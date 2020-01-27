@@ -1,0 +1,32 @@
+version: '2.4'
+
+services:
+  frontend:
+    container_name: wiper-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8022:80"
+  db:
+    container_name: wiper-db
+    image: "mariadb:10.4"
+    environment:
+      MYSQL_DATABASE: languagetool
+      MYSQL_ROOT_PASSWORD: languagetool
+      MYSQL_INITDB_SKIP_TZINFO: "yes"
+    ports:
+      - "8023:3306"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+  parsoid:
+    container_name: parsoid
+    image: "thenets/parsoid:0.10"
+    environment:
+      PARSOID_DOMAIN_wikipedia_fr: https://fr.wikipedia.org/w/api.php
+      PARSOID_NUM_WORKERS: ncpu
+      PARSOID_STRICT_SSL: "false"
+    ports:
+      - "8024:8000"
+
