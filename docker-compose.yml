@@ -12,6 +12,7 @@ services:
   db:
     container_name: wiper-db
     image: "mariadb:10.4"
+    restart: always
     environment:
       MYSQL_DATABASE: languagetool
       MYSQL_ROOT_PASSWORD: languagetool
@@ -23,6 +24,7 @@ services:
   parsoid:
     container_name: parsoid
     image: "thenets/parsoid:0.10"
+    restart: always
     environment:
       PARSOID_DOMAIN_wikipedia_fr: https://fr.wikipedia.org/w/api.php
       PARSOID_NUM_WORKERS: ncpu
