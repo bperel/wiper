@@ -1,4 +1,4 @@
-create or replace table corpus_match
+create table corpus_match
 (
     id int auto_increment
         primary key,
@@ -20,7 +20,7 @@ create or replace table corpus_match
 )
     charset=utf8mb4;
 
-create or replace table html_nodes
+create table html_node
 (
     id int auto_increment
         primary key,
@@ -29,17 +29,19 @@ create or replace table html_nodes
     tag_name varchar(16) not null,
     constraint html_tag_unique
         unique (source_uri, tag_name, xpath)
-);
+)
+    charset=utf8mb4;
 
-create or replace table html_attribute
+
+create table html_attribute
 (
     id int auto_increment
         primary key,
-    node_id int not null,
+    source_uri varchar(255) not null,
+    node_xpath varchar(255) not null,
     attribute_name varchar(32) not null,
-    attribute_value varchar(255) not null,
+    attribute_value text not null,
     constraint html_attribute_unique
-        unique (node_id, attribute_name, attribute_value),
-    constraint html_attribute___fk_node_id
-        foreign key (node_id) references html_nodes (id)
-);
+        unique (source_uri, node_xpath, attribute_name, attribute_value) using hash
+)
+    charset=utf8mb4;
