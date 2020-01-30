@@ -31,4 +31,14 @@ services:
       PARSOID_STRICT_SSL: "false"
     ports:
       - "8024:8000"
+  languagetool-server:
+    container_name: languagetool-server
+    build:
+      context: .
+      dockerfile: Dockerfile-languagetool
+    volumes:
+      - ./languagetool:/home
+    restart: always
+    ports:
+      - "8025:8010"
 
