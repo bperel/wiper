@@ -1,16 +1,23 @@
 <template>
   <b-container>
     <b-row>
-      <b-row class="gametitle" v-for="article in articles" :key="article.title">
+      <b-row class="gametitle" v-for="article in articles" :key="article.errorContext">
         <b-col md="12" class="section">
           <div class="sec_text_title">
-            <a class="external" target="_blank" :href="article.url">
-              {{ article.title }}
+            <a class="external" target="_blank" :href="article.sourceuri">
+              {{ article.sourceuri }}
             </a>
-            <small>[{{ article.namespace }}]</small>
+            <small>[{{ article.sourceType }}]</small>
           </div>
           <div class="item_preview">
-            <div class="item_label"></div>
+            <div class="item_label">
+              {{ article.message }}
+              <div>
+                <small>
+                  {{ article.ruleDescription }}
+                </small>
+              </div>
+            </div>
           </div>
         </b-col>
         <b-col md="12" class="control_box">
