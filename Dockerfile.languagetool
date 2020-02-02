@@ -1,0 +1,37 @@
+FROM debian:stretch as build
+
+MAINTAINER Bruno Perel <brunoperel@gmail.com>
+
+RUN set -ex \
+    && mkdir -p /uploads /etc/apt/sources.list.d /var/cache/apt/archives/ \
+    && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get clean \
+    && apt-get update -y \
+    && apt-get install -y \
+        git \
+        openjdk-8-jdk-headless \
+        maven \
+    && apt-get clean
+
+WORKDIR /srv
+RUN git clone --depth=1 https://github.com/bperel/languagetool
+RUN cd languagetool && mvn install -DskipTests && ./build.sh languagetool-server package -DskipTests
+
+
+FROM debian:stretch as languagetool-server
+WORKDIR /srv/languagetool-runtime
+
+COPY --from=build /srv/languagetool/languagetool-standalone/target/LanguageTool-*-SNAPSHOT.zip /srv/languagetool-runtime
+
+RUN apt-get clean \
+ && apt-get update -y \
+ && apt-get install -y bash openjdk-8-jre-headless unzip \
+ && apt-get clean
+
+RUN unzip LanguageTool-*-SNAPSHOT.zip && rm LanguageTool-*-SNAPSHOT.zip
+
+COPY scripts/entrypoint-languagetool-server.sh /home/entrypoint.sh
+RUN chmod +x /home/entrypoint.sh
+ENTRYPOINT ["sh", "-c", "/home/entrypoint.sh"]
+
+EXPOSE 8010

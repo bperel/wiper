@@ -35,9 +35,10 @@ services:
     container_name: languagetool-server
     build:
       context: .
-      dockerfile: Dockerfile-languagetool
+      dockerfile: Dockerfile.languagetool
+      target: languagetool-server
     volumes:
-      - ./languagetool:/home
+      - ./db.properties:/home/db.properties
     restart: always
     ports:
       - "8025:8010"
