@@ -11,24 +11,25 @@ RUN set -ex \
         git \
         openjdk-8-jdk-headless \
         maven \
+        unzip \
     && apt-get clean
 
 WORKDIR /srv
 RUN git clone --depth=1 https://github.com/bperel/languagetool
 RUN cd languagetool && mvn install -DskipTests && ./build.sh languagetool-server package -DskipTests
 
+WORKDIR /srv/languagetool-runtime
+RUN unzip /srv/languagetool/languagetool-standalone/target/LanguageTool-*-SNAPSHOT.zip \
+ && rm -rf /srv/languagetool
+
 
 FROM debian:stretch as languagetool-server
-WORKDIR /srv/languagetool-runtime
-
-COPY --from=build /srv/languagetool/languagetool-standalone/target/LanguageTool-*-SNAPSHOT.zip /srv/languagetool-runtime
+COPY --from=build /srv/languagetool-runtime /srv/languagetool-runtime
 
 RUN apt-get clean \
  && apt-get update -y \
- && apt-get install -y bash openjdk-8-jre-headless unzip \
+ && apt-get install -y bash openjdk-8-jre-headless \
  && apt-get clean
-
-RUN unzip LanguageTool-*-SNAPSHOT.zip && rm LanguageTool-*-SNAPSHOT.zip
 
 COPY scripts/entrypoint-languagetool-server.sh /home/entrypoint.sh
 RUN chmod +x /home/entrypoint.sh
