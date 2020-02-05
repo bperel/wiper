@@ -1,7 +1,18 @@
+create table corpus_article
+(
+    id int auto_increment
+        primary key,
+    title varchar(255) not null,
+    revision int not null,
+    text text not null
+)
+    charset=utf8mb4;
+
 create table corpus_match
 (
     id int auto_increment
         primary key,
+    article_id int not null,
     version tinyint not null,
     language_code varchar(16) not null,
     ruleid varchar(255) not null,
@@ -13,10 +24,26 @@ create table corpus_match
     small_error_context mediumtext not null,
     corpus_date date not null,
     check_date date not null,
-    sourceuri varchar(255) not null,
     source_type varchar(255) not null,
     is_visible tinyint(1) not null,
-    replacement_suggestion varchar(255) not null
+    replacement_suggestion varchar(255) not null,
+    applied tinyint(1) null,
+    constraint corpus_match___fk_article_id
+        foreign key (article_id) references corpus_article (id)
+)
+    charset=utf8mb4;
+
+create table html_attribute
+(
+    id int auto_increment
+        primary key,
+    article_id int not null,
+    parent_id int null,
+    child_index int not null,
+    attribute_name varchar(32) not null,
+    attribute_value text not null,
+    constraint html_attribute___fk_article_id
+        foreign key (article_id) references corpus_article (id)
 )
     charset=utf8mb4;
 
@@ -24,24 +51,11 @@ create table html_node
 (
     id int auto_increment
         primary key,
-    source_uri varchar(255) not null,
-    xpath varchar(255) not null,
+    article_id int not null,
+    parent_id int null,
+    child_index int not null,
     tag_name varchar(16) not null,
-    constraint html_tag_unique
-        unique (source_uri, tag_name, xpath)
-)
-    charset=utf8mb4;
-
-
-create table html_attribute
-(
-    id int auto_increment
-        primary key,
-    source_uri varchar(255) not null,
-    node_xpath varchar(255) not null,
-    attribute_name varchar(32) not null,
-    attribute_value text not null,
-    constraint html_attribute_unique
-        unique (source_uri, node_xpath, attribute_name, attribute_value) using hash
+    constraint html_node___fk_article_id
+        foreign key (article_id) references corpus_article (id)
 )
     charset=utf8mb4;
