@@ -3,6 +3,8 @@ version: '2.4'
 services:
   frontend:
     container_name: wiper-frontend
+    depends_on:
+      - languagetool-server
     build:
       context: .
       dockerfile: Dockerfile
@@ -33,6 +35,9 @@ services:
       - "8024:8000"
   languagetool-server:
     container_name: languagetool-server
+    depends_on:
+      - db
+      - parsoid
     build:
       context: .
       dockerfile: Dockerfile.languagetool
