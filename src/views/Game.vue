@@ -1,5 +1,6 @@
 <template>
   <div class="game">
+    <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
     <TileList :articles="articles" />
   </div>
 </template>
@@ -11,7 +12,8 @@ import axios from "axios";
 export default {
   name: "game",
   data: () => ({
-    articles: []
+    articles: [],
+    error: null
   }),
 
   mounted() {
@@ -20,6 +22,9 @@ export default {
       .get("http://localhost:8025/v2/wikipedia/suggestions")
       .then(({ data }) => {
         vm.articles = data.suggestions;
+      })
+      .catch(() => {
+        vm.error = "Something wrong occurred while fetching the suggestions";
       });
   },
   components: {
