@@ -33,7 +33,7 @@ create table corpus_match
 )
     charset=utf8mb4;
 
-create table html_attribute
+create table corpus_article_html_attribute
 (
     id int auto_increment
         primary key,
@@ -47,7 +47,7 @@ create table html_attribute
 )
     charset=utf8mb4;
 
-create table html_node
+create table corpus_article_html_node
 (
     id int auto_increment
         primary key,
