@@ -21,11 +21,11 @@
                 <small>
                   {{ article.ruleDescription }}
                 </small>
-                <div
+                <SuggestionDiff
                   v-if="article.id === activeSuggestionId"
-                  class="diff"
-                  v-html="diff"
-                ></div>
+                  :suggestion-id="activeSuggestionId"
+                  @suggestion-diff-loaded="ready = true"
+                />
               </div>
             </div>
           </div>
@@ -62,42 +62,15 @@
 </template>
 
 <script>
-import axios from "axios";
-import DiffMatchPatch from "diff-match-patch";
+import SuggestionDiff from "./SuggestionDiff";
 
 export default {
   name: "TileList",
+  components: { SuggestionDiff },
   props: ["activeSuggestionId", "articles"],
   data: () => ({
-    ready: false,
-    diff: null
-  }),
-
-  watch: {
-    activeSuggestionId: {
-      immediate: true,
-      handler: function(newId) {
-        let vm = this;
-        vm.ready = false;
-        axios
-          .get(
-            `http://localhost:8081/v2/wikipedia/suggestion?suggestion_id=${newId}`
-          )
-          .then(({ data }) => {
-            const dmp = new DiffMatchPatch();
-            vm.diff = dmp.diff_prettyHtml(
-              dmp.diff_main(data.originalWikitext, data.suggestedWikitext)
-            );
-            dmp.diff_cleanupSemantic(vm.diff);
-            vm.ready = true;
-          })
-          .catch(() => {
-            vm.error =
-              "Something wrong occurred while fetching the suggestion details";
-          });
-      }
-    }
-  }
+    ready: false
+  })
 };
 </script>
 
