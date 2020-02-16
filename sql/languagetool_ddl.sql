@@ -4,7 +4,8 @@ create table corpus_article
         primary key,
     title varchar(255) not null,
     revision int not null,
-    text mediumtext not null
+    wikitext mediumtext null,
+    anonymized_html mediumtext not null
 )
     charset=utf8mb4;
 
