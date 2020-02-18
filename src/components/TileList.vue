@@ -3,27 +3,27 @@
     <b-row>
       <b-row
         class="gametitle"
-        v-for="article in articles"
-        :key="article.id"
-        :class="{ active: activeSuggestionId }"
+        v-for="tile in tiles"
+        :key="tile.suggestion.id"
+        :class="{ active: activeTile.suggestion.id === tile.suggestion.id }"
       >
         <b-col md="12" class="section">
           <div class="sec_text_title">
-            <a class="external" target="_blank" :href="article.sourceuri">
-              {{ article.sourceuri }}
+            <a class="external" target="_blank" :href="tile.article.sourceuri">
+              {{ tile.article.title }}
             </a>
-            <small>[{{ article.sourceType }}]</small>
+            <small>[{{ tile.suggestion.sourceType }} {{ tile.suggestion.languageCode }}]</small>
           </div>
           <div class="item_preview">
             <div class="item_label">
-              {{ article.message }}
+              {{ tile.suggestion.message }}
               <div>
                 <small>
-                  {{ article.ruleDescription }}
+                  {{ tile.suggestion.ruleDescription }}
                 </small>
                 <SuggestionDiff
-                  v-if="article.id === activeSuggestionId"
-                  :suggestion-id="activeSuggestionId"
+                  v-if="tile.suggestion.id === activeTile.suggestion.id"
+                  :suggestion-id="activeTile.suggestion.id"
                   @suggestion-diff-loaded="ready = true"
                 />
               </div>
@@ -35,19 +35,25 @@
             <b-col md="12" class="control">
               <b-btn-group size="lg">
                 <b-btn
-                  :disabled="!(article.id === activeSuggestionId && ready)"
+                  :disabled="
+                    !(tile.suggestion.id === activeTile.suggestion.id && ready)
+                  "
                   size="lg"
                   variant="success"
                   >Fix</b-btn
                 >
                 <b-btn
-                  :disabled="!(article.id === activeSuggestionId && ready)"
+                  :disabled="
+                    !(tile.suggestion.id === activeTile.suggestion.id && ready)
+                  "
                   size="lg"
                   variant="light"
                   >Skip</b-btn
                 >
                 <b-btn
-                  :disabled="!(article.id === activeSuggestionId && ready)"
+                  :disabled="
+                    !(tile.suggestion.id === activeTile.suggestion.id && ready)
+                  "
                   size="lg"
                   variant="primary"
                   >Do not fix</b-btn
@@ -67,7 +73,7 @@ import SuggestionDiff from "./SuggestionDiff";
 export default {
   name: "TileList",
   components: { SuggestionDiff },
-  props: ["activeSuggestionId", "articles"],
+  props: ["activeTile", "tiles"],
   data: () => ({
     ready: false
   })

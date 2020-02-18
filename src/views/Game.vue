@@ -1,7 +1,7 @@
 <template>
   <div class="game">
     <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
-    <TileList :articles="articles" :activeSuggestionId="activeSuggestionId" />
+    <TileList :tiles="tiles" :activeTile="activeTile" />
   </div>
 </template>
 
@@ -12,8 +12,8 @@ import axios from "axios";
 export default {
   name: "game",
   data: () => ({
-    articles: [],
-    activeSuggestionId: null,
+    tiles: [],
+    activeTile: null,
     error: null
   }),
 
@@ -22,8 +22,8 @@ export default {
     axios
       .get("http://localhost:8081/v2/wikipedia/suggestions")
       .then(({ data }) => {
-        vm.articles = data.suggestions;
-        vm.setFirstSuggestionAsActive();
+        vm.tiles = data.suggestions;
+        vm.setFirstTileAsActive();
       })
       .catch(() => {
         vm.error = "Something wrong occurred while fetching the suggestions";
@@ -31,8 +31,8 @@ export default {
   },
 
   methods: {
-    setFirstSuggestionAsActive: function() {
-      this.activeSuggestionId = this.articles[0].id;
+    setFirstTileAsActive: function() {
+      this.activeTile = this.tiles[0];
     }
   },
 
