@@ -33,30 +33,3 @@ create table corpus_match
         foreign key (article_id) references corpus_article (id)
 )
     charset=utf8mb4;
-
-create table corpus_article_html_attribute
-(
-    id int auto_increment
-        primary key,
-    article_id int not null,
-    parent_id int null,
-    child_index int not null,
-    attribute_name varchar(32) not null,
-    attribute_value text not null,
-    constraint html_attribute___fk_article_id
-        foreign key (article_id) references corpus_article (id)
-)
-    charset=utf8mb4;
-
-create table corpus_article_html_node
-(
-    id int auto_increment
-        primary key,
-    article_id int not null,
-    parent_id int null,
-    child_index int not null,
-    tag_name varchar(16) not null,
-    constraint html_node___fk_article_id
-        foreign key (article_id) references corpus_article (id)
-)
-    charset=utf8mb4;
