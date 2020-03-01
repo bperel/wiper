@@ -1,5 +1,5 @@
 <template>
-  <div class="html-diff" v-html="htmlDiff"></div>
+  <pre class="html-diff" v-html="htmlDiff"></pre>
 </template>
 <script>
 import axios from "axios";
@@ -73,6 +73,8 @@ export default {
 
 <style lang="scss">
 .html-diff {
+  white-space: pre-wrap;
+
   ins {
     background: #e6ffe6;
   }

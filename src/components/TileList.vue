@@ -12,21 +12,22 @@
             <a class="external" target="_blank" :href="tile.article.sourceuri">
               {{ tile.article.title }}
             </a>
-            <small>[{{ tile.suggestion.sourceType }} {{ tile.suggestion.languageCode }}]</small>
+            <small
+              >[{{ tile.suggestion.sourceType }}
+              {{ tile.suggestion.languageCode }}]</small
+            >
           </div>
           <div class="item_preview">
-            <div class="item_label">
-              {{ tile.suggestion.message }}
-              <div>
-                <small>
-                  {{ tile.suggestion.ruleDescription }}
-                </small>
-                <SuggestionDiff
-                  v-if="tile.suggestion.id === activeTile.suggestion.id"
-                  :suggestion-id="activeTile.suggestion.id"
-                  @suggestion-diff-loaded="ready = true"
-                />
-              </div>
+            <div class="item_label" v-html="tile.suggestion.message"></div>
+            <div>
+              <small>
+                {{ tile.suggestion.ruleDescription }}
+              </small>
+              <SuggestionDiff
+                v-if="tile.suggestion.id === activeTile.suggestion.id"
+                :suggestion-id="activeTile.suggestion.id"
+                @suggestion-diff-loaded="ready = true"
+              />
             </div>
           </div>
         </b-col>
@@ -48,6 +49,7 @@
                   "
                   size="lg"
                   variant="light"
+                  @click="$emit('nextTile')"
                   >Skip</b-btn
                 >
                 <b-btn
@@ -80,7 +82,7 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .gametitle {
   border-radius: 10px;
   box-shadow: 10px 10px 5px #888;
@@ -108,6 +110,12 @@ export default {
       * {
         font-weight: bold !important;
       }
+    }
+  }
+
+  .item_label {
+    suggestion {
+      font-weight: bold;
     }
   }
 }
