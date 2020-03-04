@@ -1,13 +1,21 @@
 <template>
   <div class="game">
     <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
-    <TileList :tiles="tiles" :activeTile="activeTile" @nextTile="nextTile()" />
+    <TileList
+      :tiles="tiles"
+      :activeTile="activeTile"
+      @acceptSuggestionEdit="acceptSuggestionEdit()"
+      @nextTile="nextTile()"
+      @refuseSuggestionEdit="refuseSuggestionEdit()"
+    />
   </div>
 </template>
 
 <script>
 import TileList from "@/components/TileList.vue";
 import axios from "axios";
+
+const LANGUAGETOOL_ENDPOINT_ROOT = "http://localhost:8081/v2/wikipedia";
 
 export default {
   name: "game",
@@ -20,7 +28,7 @@ export default {
   mounted() {
     let vm = this;
     axios
-      .get("http://localhost:8081/v2/wikipedia/suggestions")
+      .get(`${LANGUAGETOOL_ENDPOINT_ROOT}/suggestions`)
       .then(({ data }) => {
         vm.tiles = data.suggestions;
         vm.setFirstTileAsActive();
@@ -33,6 +41,34 @@ export default {
   methods: {
     setFirstTileAsActive: function() {
       this.activeTile = this.tiles[0];
+    },
+
+    acceptSuggestionEdit: function() {
+      let vm = this;
+      axios
+        .post(
+          `${LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/accept?suggestion_id=${vm.activeTile.suggestion.id}`
+        )
+        .then(() => {
+          this.nextTile();
+        })
+        .catch(() => {
+          vm.error = "Something wrong occurred while accepting the suggestion";
+        });
+    },
+
+    refuseSuggestionEdit: function() {
+      let vm = this;
+      axios
+        .post(
+          `${LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/refuse?suggestion_id=${vm.activeTile.suggestion.id}`
+        )
+        .then(() => {
+          this.nextTile();
+        })
+        .catch(() => {
+          vm.error = "Something wrong occurred while refusing the suggestion";
+        });
     },
 
     nextTile: function() {

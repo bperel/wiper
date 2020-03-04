@@ -41,6 +41,7 @@
                   "
                   size="lg"
                   variant="success"
+                  @click="$emit('acceptSuggestionEdit')"
                   >Fix</b-btn
                 >
                 <b-btn
@@ -58,6 +59,7 @@
                   "
                   size="lg"
                   variant="primary"
+                  @click="$emit('refuseSuggestionEdit')"
                   >Do not fix</b-btn
                 >
               </b-btn-group>
