@@ -1,0 +1,47 @@
+title WiPeR
+
+actor Front-end
+participant LanguageTool server
+database corpus_match DB table
+actor cronjob
+participant LanguageTool wikipedia
+participant Parsoid
+participant Local Wikipedia instance
+participant Live Wikipedia instance
+
+== Populating the suggestions DB ==
+
+cronjob->LanguageTool wikipedia: Run
+LanguageTool wikipedia->Live Wikipedia instance: Request dump with templates
+Live Wikipedia instance->LanguageTool wikipedia: Get dump
+note over LanguageTool wikipedia: process XML
+loop for each article
+  LanguageTool wikipedia->Parsoid: Request HTML from wikicode
+  Parsoid->Local Wikipedia instance: Request HTML from wikicode
+    Local Wikipedia instance->Parsoid: Get HTML
+
+  Parsoid->LanguageTool wikipedia: Get HTML
+  LanguageTool wikipedia->LanguageTool server: Request to get suggestions from HTML
+  note over LanguageTool server: Strip HTML tag attributes\nfrom HTML
+  note over LanguageTool server: Check HTML for spelling mistakes
+  LanguageTool server->corpus_match DB table: Store suggestions
+end
+
+
+== Fetching suggestions ==
+Front-end->LanguageTool server: Fetch 10 random suggestions
+LanguageTool server->corpus_match DB table:  Fetch 10 random suggestions
+corpus_match DB table->LanguageTool server: Get suggestions
+LanguageTool server->Front-end: Get suggestions
+
+== Applying a suggestion ==
+
+Front-end->LanguageTool server: Validate suggestion <id>\non article <article_id>
+LanguageTool server->corpus_match DB table: Request suggestion <id>
+corpus_match DB table->LanguageTool server: Get suggestion <id>
+LanguageTool server->LanguageTool wikipedia: Request to update suggestion <id> on article <article_id>
+LanguageTool wikipedia->Live Wikipedia instance: Get last revision ID of <article_id>
+note over LanguageTool wikipedia: Check that article to be modified\nhas the latest revision ID
+note over LanguageTool wikipedia: Try to replace faulty text\nwith suggestion in wikicode string
+LanguageTool wikipedia->Live Wikipedia instance: Update article
+LanguageTool wikipedia->Front-end: Feedback article update
