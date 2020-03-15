@@ -14,7 +14,6 @@
 <script>
 import TileList from "@/components/TileList.vue";
 import axios from "axios";
-
 const LANGUAGETOOL_ENDPOINT_ROOT = "http://localhost:8081/v2/wikipedia";
 
 export default {
@@ -26,16 +25,7 @@ export default {
   }),
 
   mounted() {
-    let vm = this;
-    axios
-      .get(`${LANGUAGETOOL_ENDPOINT_ROOT}/suggestions`)
-      .then(({ data }) => {
-        vm.tiles = data.suggestions;
-        vm.setFirstTileAsActive();
-      })
-      .catch(() => {
-        vm.error = "Something wrong occurred while fetching the suggestions";
-      });
+    this.getSuggestions();
   },
 
   methods: {
@@ -46,9 +36,10 @@ export default {
     acceptSuggestionEdit: function() {
       let vm = this;
       axios
-        .post(
-          `${LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/accept?suggestion_id=${vm.activeTile.suggestion.id}`
-        )
+        .post(`${LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/accept`, {
+          suggestion_id: vm.activeTile.suggestion.id,
+          accessToken: vm.$cookies.get("wiper")
+        })
         .then(() => {
           this.nextTile();
         })
@@ -60,9 +51,10 @@ export default {
     refuseSuggestionEdit: function() {
       let vm = this;
       axios
-        .post(
-          `${LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/refuse?suggestion_id=${vm.activeTile.suggestion.id}`
-        )
+        .post(`${LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/refuse`, {
+          suggestion_id: vm.activeTile.suggestion.id,
+          accessToken: vm.$cookies.get("wiper")
+        })
         .then(() => {
           this.nextTile();
         })
@@ -74,6 +66,19 @@ export default {
     nextTile: function() {
       this.tiles.splice(0, 1);
       this.setFirstTileAsActive();
+    },
+
+    getSuggestions: function() {
+      let vm = this;
+      axios
+        .get(`${LANGUAGETOOL_ENDPOINT_ROOT}/suggestions`)
+        .then(({ data }) => {
+          vm.tiles = data.suggestions;
+          vm.setFirstTileAsActive();
+        })
+        .catch(() => {
+          vm.error = "Something wrong occurred while fetching the suggestions";
+        });
     }
   },
 

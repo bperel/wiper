@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <Navbar />
     <div id="nav">
       <router-link to="/">Game</router-link> |
       <router-link to="/about">About</router-link>
@@ -30,3 +31,9 @@
   }
 }
 </style>
+<script>
+import Navbar from "./views/Navbar";
+export default {
+  components: { Navbar }
+};
+</script>
