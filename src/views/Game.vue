@@ -14,7 +14,7 @@
 <script>
 import TileList from "@/components/TileList.vue";
 import axios from "axios";
-const LANGUAGETOOL_ENDPOINT_ROOT = "http://localhost:8081/v2/wikipedia";
+import { mapState } from "vuex";
 
 export default {
   name: "game",
@@ -23,6 +23,8 @@ export default {
     activeTile: null,
     error: null
   }),
+
+  computed: mapState(["LANGUAGETOOL_ENDPOINT_ROOT"]),
 
   mounted() {
     this.getSuggestions();
@@ -36,7 +38,7 @@ export default {
     acceptSuggestionEdit: function() {
       let vm = this;
       axios
-        .post(`${LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/accept`, {
+        .post(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/accept`, {
           suggestion_id: vm.activeTile.suggestion.id,
           accessToken: vm.$cookies.get("wiper")
         })
@@ -51,7 +53,7 @@ export default {
     refuseSuggestionEdit: function() {
       let vm = this;
       axios
-        .post(`${LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/refuse`, {
+        .post(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/refuse`, {
           suggestion_id: vm.activeTile.suggestion.id,
           accessToken: vm.$cookies.get("wiper")
         })
@@ -71,7 +73,7 @@ export default {
     getSuggestions: function() {
       let vm = this;
       axios
-        .get(`${LANGUAGETOOL_ENDPOINT_ROOT}/suggestions`)
+        .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions`)
         .then(({ data }) => {
           vm.tiles = data.suggestions;
           vm.setFirstTileAsActive();
