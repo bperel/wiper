@@ -4,9 +4,9 @@
     <TileList
       :tiles="tiles"
       :activeTile="activeTile"
-      @acceptSuggestionEdit="acceptSuggestionEdit()"
+      @acceptSuggestionEdit="applySuggestionEditDecision(true)"
       @nextTile="nextTile()"
-      @refuseSuggestionEdit="refuseSuggestionEdit()"
+      @refuseSuggestionEdit="applySuggestionEditDecision(false)"
     />
   </div>
 </template>
@@ -24,7 +24,7 @@ export default {
     error: null
   }),
 
-  computed: mapState(["LANGUAGETOOL_ENDPOINT_ROOT"]),
+  computed: mapState(["LANGUAGETOOL_ENDPOINT_ROOT", "userAccessToken"]),
 
   mounted() {
     this.getSuggestions();
@@ -35,33 +35,29 @@ export default {
       this.activeTile = this.tiles[0];
     },
 
-    acceptSuggestionEdit: function() {
+    applySuggestionEditDecision: function(accept) {
       let vm = this;
+      const params = new URLSearchParams();
+      params.append("suggestion_id", vm.activeTile.suggestion.id);
+      params.append("accessToken", vm.userAccessToken);
       axios
-        .post(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/accept`, {
-          suggestion_id: vm.activeTile.suggestion.id,
-          accessToken: vm.$cookies.get("wiper")
-        })
+        .post(
+          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/${
+            accept ? "accept" : "refuse"
+          }`,
+          params,
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+            }
+          }
+        )
         .then(() => {
           this.nextTile();
         })
         .catch(() => {
-          vm.error = "Something wrong occurred while accepting the suggestion";
-        });
-    },
-
-    refuseSuggestionEdit: function() {
-      let vm = this;
-      axios
-        .post(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/refuse`, {
-          suggestion_id: vm.activeTile.suggestion.id,
-          accessToken: vm.$cookies.get("wiper")
-        })
-        .then(() => {
-          this.nextTile();
-        })
-        .catch(() => {
-          vm.error = "Something wrong occurred while refusing the suggestion";
+          vm.error =
+            "Something wrong occurred while submitting the suggestion decision";
         });
     },
 

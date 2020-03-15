@@ -6,6 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     username: null,
+    userAccessToken: null,
     LANGUAGETOOL_ENDPOINT_ROOT: "http://localhost:8081/v2/wikipedia"
   },
   mutations: {
