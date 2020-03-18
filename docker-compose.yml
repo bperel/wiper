@@ -43,7 +43,7 @@ services:
       dockerfile: Dockerfile.languagetool
       target: languagetool-server
     volumes:
-      - ./db.properties:/home/db.properties
+      - ./server.properties:/home/server.properties
     restart: always
     ports:
       - "8025:8010"
