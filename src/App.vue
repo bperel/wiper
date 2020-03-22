@@ -46,7 +46,7 @@ export default {
 
   methods: {
     ...mapMutations(["setUsername", "setUserAccessToken"]),
-    initLogin: function() {
+    initLogin: function () {
       let vm = this;
       axios
         .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/authorize`)
@@ -61,7 +61,7 @@ export default {
         });
     },
 
-    readSessionUser: function() {
+    readSessionUser: function () {
       let vm = this;
       if (this.$route.query.oauth_verifier) {
         if (this.$cookies.isKey("wiper_requestToken")) {
@@ -99,7 +99,7 @@ export default {
           });
       }
       return Promise.reject(new Error("No session"));
-    }
-  }
+    },
+  },
 };
 </script>

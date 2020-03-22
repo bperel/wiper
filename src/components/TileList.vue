@@ -79,8 +79,8 @@ export default {
   components: { SuggestionDiff },
   props: ["activeTile", "tiles"],
   data: () => ({
-    ready: false
-  })
+    ready: false,
+  }),
 };
 </script>
 

@@ -21,7 +21,7 @@ export default {
   data: () => ({
     tiles: [],
     activeTile: null,
-    error: null
+    error: null,
   }),
 
   computed: mapState(["LANGUAGETOOL_ENDPOINT_ROOT", "userAccessToken"]),
@@ -31,11 +31,11 @@ export default {
   },
 
   methods: {
-    setFirstTileAsActive: function() {
+    setFirstTileAsActive: function () {
       this.activeTile = this.tiles[0];
     },
 
-    applySuggestionEditDecision: function(accept) {
+    applySuggestionEditDecision: function (accept) {
       let vm = this;
       const params = new URLSearchParams();
       params.append("suggestion_id", vm.activeTile.suggestion.id);
@@ -48,8 +48,9 @@ export default {
           params,
           {
             headers: {
-              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
-            }
+              "Content-Type":
+                "application/x-www-form-urlencoded; charset=UTF-8",
+            },
           }
         )
         .then(() => {
@@ -61,12 +62,12 @@ export default {
         });
     },
 
-    nextTile: function() {
+    nextTile: function () {
       this.tiles.splice(0, 1);
       this.setFirstTileAsActive();
     },
 
-    getSuggestions: function() {
+    getSuggestions: function () {
       let vm = this;
       axios
         .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions`)
@@ -77,11 +78,11 @@ export default {
         .catch(() => {
           vm.error = "Something wrong occurred while fetching the suggestions";
         });
-    }
+    },
   },
 
   components: {
-    TileList
-  }
+    TileList,
+  },
 };
 </script>

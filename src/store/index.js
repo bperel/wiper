@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     username: null,
     userAccessToken: null,
-    LANGUAGETOOL_ENDPOINT_ROOT: "http://localhost:8081/v2/wikipedia"
+    LANGUAGETOOL_ENDPOINT_ROOT: "http://localhost:8081/v2/wikipedia",
   },
   mutations: {
     setUsername(state, username) {
@@ -15,8 +15,8 @@ export default new Vuex.Store({
     },
     setUserAccessToken(state, accessToken) {
       state.userAccessToken = accessToken;
-    }
+    },
   },
   actions: {},
-  modules: {}
+  modules: {},
 });

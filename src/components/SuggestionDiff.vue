@@ -6,10 +6,10 @@ import axios from "axios";
 import DiffMatchPatch, {
   DIFF_DELETE,
   DIFF_EQUAL,
-  DIFF_INSERT
+  DIFF_INSERT,
 } from "diff-match-patch";
 
-const diffToHtml = function(diffs) {
+const diffToHtml = function (diffs) {
   const html = [];
   const pattern_amp = /&/g;
   const pattern_lt = /</g;
@@ -41,12 +41,12 @@ const diffToHtml = function(diffs) {
 export default {
   name: "SuggestionDiff",
   props: {
-    suggestionId: {}
+    suggestionId: {},
   },
 
   data() {
     return {
-      htmlDiff: ""
+      htmlDiff: "",
     };
   },
 
@@ -67,7 +67,7 @@ export default {
         vm.error =
           "Something wrong occurred while fetching the suggestion details";
       });
-  }
+  },
 };
 </script>
 
