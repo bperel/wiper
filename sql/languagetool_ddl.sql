@@ -5,7 +5,9 @@ create table corpus_article
     title varchar(255) not null,
     revision int not null,
     wikitext mediumtext null,
-    anonymized_html mediumtext not null
+    anonymized_html mediumtext not null,
+    constraint corpus_article_uindex
+        unique (title, revision)
 )
     charset=utf8mb4;
 
@@ -29,7 +31,15 @@ create table corpus_match
     is_visible tinyint(1) not null,
     replacement_suggestion varchar(255) not null,
     applied tinyint(1) null,
-    constraint corpus_match___fk_article_id
+    applied_date datetime null,
+    constraint corpus_match_unique
+        unique (article_id, rule_description, error_context, replacement_suggestion) using hash,
+    constraint corpus_match_corpus_article_id_fk
         foreign key (article_id) references corpus_article (id)
 )
     charset=utf8mb4;
+
+create index corpus_match_index_article
+    on corpus_match (article_id);
+
+
