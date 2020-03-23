@@ -8,6 +8,7 @@ import DiffMatchPatch, {
   DIFF_EQUAL,
   DIFF_INSERT,
 } from "diff-match-patch";
+import { mapState } from "vuex";
 
 const diffToHtml = function (diffs) {
   const html = [];
@@ -44,6 +45,8 @@ export default {
     suggestionId: {},
   },
 
+  computed: mapState(["LANGUAGETOOL_ENDPOINT_ROOT"]),
+
   data() {
     return {
       htmlDiff: "",
@@ -54,7 +57,7 @@ export default {
     let vm = this;
     axios
       .get(
-        `http://localhost:8081/v2/wikipedia/suggestion?suggestion_id=${vm.suggestionId}`
+        `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion?suggestion_id=${vm.suggestionId}`
       )
       .then(({ data }) => {
         const dmp = new DiffMatchPatch();

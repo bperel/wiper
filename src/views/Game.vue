@@ -1,7 +1,15 @@
 <template>
   <div class="game">
     <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
+    <b-alert v-if="!error && !tiles.length" show variant="info"
+      >There are no suggestions for the moment.</b-alert
+    >
+    <b-alert v-if="!error && tiles.length && !username" show variant="warning"
+      >You need to be logged to play this game. Click on the button on the top
+      right of this page!</b-alert
+    >
     <TileList
+      :disabled="!username"
       :tiles="tiles"
       :activeTile="activeTile"
       @acceptSuggestionEdit="applySuggestionEditDecision(true)"
@@ -24,7 +32,11 @@ export default {
     error: null,
   }),
 
-  computed: mapState(["LANGUAGETOOL_ENDPOINT_ROOT", "userAccessToken"]),
+  computed: mapState([
+    "LANGUAGETOOL_ENDPOINT_ROOT",
+    "userAccessToken",
+    "username",
+  ]),
 
   mounted() {
     this.getSuggestions();
@@ -65,6 +77,9 @@ export default {
     nextTile: function () {
       this.tiles.splice(0, 1);
       this.setFirstTileAsActive();
+      if (this.tiles.length === 0) {
+        this.getSuggestions();
+      }
     },
 
     getSuggestions: function () {
@@ -72,7 +87,7 @@ export default {
       axios
         .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions`)
         .then(({ data }) => {
-          vm.tiles = data.suggestions;
+          vm.tiles = vm.tiles.concat(data.suggestions);
           vm.setFirstTileAsActive();
         })
         .catch(() => {

@@ -5,7 +5,10 @@
         class="gametitle"
         v-for="tile in tiles"
         :key="tile.suggestion.id"
-        :class="{ active: activeTile.suggestion.id === tile.suggestion.id }"
+        :class="{
+          active: activeTile.suggestion.id === tile.suggestion.id,
+          disabled,
+        }"
       >
         <b-col md="12" class="section">
           <div class="sec_text_title">
@@ -41,7 +44,7 @@
                   "
                   size="lg"
                   variant="success"
-                  @click="$emit('acceptSuggestionEdit')"
+                  @click="acceptSuggestionEdit"
                   >Fix</b-btn
                 >
                 <b-btn
@@ -59,7 +62,7 @@
                   "
                   size="lg"
                   variant="primary"
-                  @click="$emit('refuseSuggestionEdit')"
+                  @click="refuseSuggestionEdit"
                   >Do not fix</b-btn
                 >
               </b-btn-group>
@@ -77,10 +80,22 @@ import SuggestionDiff from "./SuggestionDiff";
 export default {
   name: "TileList",
   components: { SuggestionDiff },
-  props: ["activeTile", "tiles"],
+  props: ["activeTile", "tiles", "disabled"],
   data: () => ({
     ready: false,
+    pendingSubmitSuggestion: null,
   }),
+
+  methods: {
+    acceptSuggestionEdit: function () {
+      this.$emit("acceptSuggestionEdit");
+      this.ready = false;
+    },
+    refuseSuggestionEdit: function () {
+      this.$emit("refuseSuggestionEdit");
+      this.ready = false;
+    },
+  },
 };
 </script>
 
@@ -113,6 +128,11 @@ export default {
         font-weight: bold !important;
       }
     }
+  }
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.4;
   }
 
   .item_label {
