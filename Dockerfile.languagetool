@@ -1,4 +1,4 @@
-FROM debian:stretch as build
+FROM openjdk:11-buster as build
 
 MAINTAINER Bruno Perel <brunoperel@gmail.com>
 
@@ -9,13 +9,11 @@ RUN set -ex \
     && apt-get update -y \
     && apt-get install -y \
         git \
-        openjdk-8-jdk-headless \
         maven \
-        unzip \
     && apt-get clean
 
 WORKDIR /srv
-RUN git clone --depth=1 https://github.com/bperel/languagetool
+RUN git clone --depth=1 --single-branch https://github.com/bperel/languagetool
 RUN cd languagetool && mvn install -DskipTests && ./build.sh languagetool-server package -DskipTests
 
 WORKDIR /srv/languagetool-runtime
@@ -23,13 +21,8 @@ RUN unzip /srv/languagetool/languagetool-standalone/target/LanguageTool-*-SNAPSH
  && rm -rf /srv/languagetool
 
 
-FROM debian:stretch as languagetool-server
+FROM openjdk:11-jre-buster as languagetool-server
 COPY --from=build /srv/languagetool-runtime /srv/languagetool-runtime
-
-RUN apt-get clean \
- && apt-get update -y \
- && apt-get install -y bash openjdk-8-jre-headless \
- && apt-get clean
 
 COPY scripts/entrypoint-languagetool-server.sh /home/entrypoint.sh
 RUN chmod +x /home/entrypoint.sh
