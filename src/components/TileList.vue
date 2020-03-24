@@ -56,15 +56,37 @@
                   @click="$emit('nextTile')"
                   >Skip</b-btn
                 >
-                <b-btn
+                <b-dropdown
                   :disabled="
                     !(tile.suggestion.id === activeTile.suggestion.id && ready)
                   "
                   size="lg"
+                  text="Do not fix"
                   variant="primary"
-                  @click="refuseSuggestionEdit"
-                  >Do not fix</b-btn
                 >
+                  <b-dropdown-item
+                    @click="refuseSuggestionEdit('false-positive')"
+                    >False positive (the suggestion is wrong, the origin text is
+                    correct)
+                  </b-dropdown-item>
+                  <b-dropdown-item
+                    @click="refuseSuggestionEdit('false-correction')"
+                    >False correction (both the original text and the suggestion
+                    are wrong)
+                  </b-dropdown-item>
+                  <b-dropdown-item
+                    @click="refuseSuggestionEdit('too-little-context')"
+                    >Not enough context around the suggestion
+                  </b-dropdown-item>
+                  <b-dropdown-item
+                    @click="refuseSuggestionEdit('should-be-ignored')"
+                    >This text shouldn't be checked (foreign language, markup,
+                    etc.)
+                  </b-dropdown-item>
+                  <b-dropdown-item @click="refuseSuggestionEdit('other')"
+                    >Other
+                  </b-dropdown-item>
+                </b-dropdown>
               </b-btn-group>
             </b-col>
           </b-row>
@@ -91,8 +113,8 @@ export default {
       this.$emit("acceptSuggestionEdit");
       this.ready = false;
     },
-    refuseSuggestionEdit: function () {
-      this.$emit("refuseSuggestionEdit");
+    refuseSuggestionEdit: function (reason) {
+      this.$emit("refuseSuggestionEdit", { reason });
       this.ready = false;
     },
   },

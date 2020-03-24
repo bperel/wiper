@@ -14,7 +14,7 @@
       :activeTile="activeTile"
       @acceptSuggestionEdit="applySuggestionEditDecision(true)"
       @nextTile="nextTile()"
-      @refuseSuggestionEdit="applySuggestionEditDecision(false)"
+      @refuseSuggestionEdit="applySuggestionEditDecision(false, $event.reason)"
     />
   </div>
 </template>
@@ -47,10 +47,11 @@ export default {
       this.activeTile = this.tiles[0];
     },
 
-    applySuggestionEditDecision: function (accept) {
+    applySuggestionEditDecision: function (accept, reason) {
       let vm = this;
       const params = new URLSearchParams();
       params.append("suggestion_id", vm.activeTile.suggestion.id);
+      params.append("reason", reason);
       params.append("accessToken", vm.userAccessToken);
       axios
         .post(
