@@ -2,6 +2,7 @@ create table corpus_article
 (
     id int auto_increment
         primary key,
+    language_code varchar(15) not null,
     title varchar(255) not null,
     revision int not null,
     wikitext mediumtext null,
@@ -16,8 +17,6 @@ create table corpus_match
     id int auto_increment
         primary key,
     article_id int not null,
-    version tinyint not null,
-    language_code varchar(16) not null,
     ruleid varchar(255) not null,
     rule_category varchar(255) not null,
     rule_subid varchar(16) null,
@@ -25,10 +24,6 @@ create table corpus_match
     message varchar(255) not null,
     error_context mediumtext not null,
     small_error_context mediumtext not null,
-    corpus_date date not null,
-    check_date date not null,
-    source_type varchar(255) not null,
-    is_visible tinyint(1) not null,
     replacement_suggestion varchar(255) not null,
     applied tinyint(1) null,
     applied_date datetime null,
