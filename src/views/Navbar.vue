@@ -3,12 +3,22 @@
     <a class="navbar-brand" href="#">WiPeR</a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto"></ul>
-      <button v-if="username" class="btn btn-outline-info" disabled>
-        {{ username }}
+      <button
+        :key="accessTokenData.languageCode"
+        v-for="accessTokenData in accessTokens"
+        class="btn btn-outline-info"
+        disabled
+      >
+        {{ accessTokenData.username }}&nbsp;<b-badge>{{ accessTokenData.languageCode }}</b-badge>
       </button>
-      <button v-if="!username" class="btn" @click="$emit('initLogin')">
-        Log in
-      </button>
+      <b-dropdown v-if="!accessTokens.length" text="Login" right>
+        <b-dropdown-item
+          v-for="languageCode in supportedLanguages"
+          :key="languageCode"
+          @click="$emit('initLogin', languageCode)"
+          >Wikipedia {{ languageCode }}
+        </b-dropdown-item>
+      </b-dropdown>
     </div>
   </nav>
 </template>
@@ -18,7 +28,12 @@ import { mapState } from "vuex";
 
 export default {
   name: "Navbar",
-  computed: mapState(["username"]),
+  computed: {
+    ...mapState(["accessTokens"]),
+  },
+  data: function () {
+    return { supportedLanguages: ["fr"] };
+  },
 };
 </script>
 

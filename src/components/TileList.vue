@@ -65,26 +65,10 @@
                   variant="primary"
                 >
                   <b-dropdown-item
-                    @click="refuseSuggestionEdit('false-positive')"
-                    >False positive (the suggestion is wrong, the origin text is
-                    correct)
-                  </b-dropdown-item>
-                  <b-dropdown-item
-                    @click="refuseSuggestionEdit('false-correction')"
-                    >False correction (both the original text and the suggestion
-                    are wrong)
-                  </b-dropdown-item>
-                  <b-dropdown-item
-                    @click="refuseSuggestionEdit('too-little-context')"
-                    >Not enough context around the suggestion
-                  </b-dropdown-item>
-                  <b-dropdown-item
-                    @click="refuseSuggestionEdit('should-be-ignored')"
-                    >This text shouldn't be checked (foreign language, markup,
-                    etc.)
-                  </b-dropdown-item>
-                  <b-dropdown-item @click="refuseSuggestionEdit('other')"
-                    >Other
+                    v-for="(value, key) in refusalReasons"
+                    :key="key"
+                    @click="refuseSuggestionEdit(key)"
+                    >{{ value }}
                   </b-dropdown-item>
                 </b-dropdown>
               </b-btn-group>
@@ -106,6 +90,16 @@ export default {
   data: () => ({
     ready: false,
     pendingSubmitSuggestion: null,
+    refusalReasons: {
+      "false-positive":
+        "False positive (the suggestion is wrong, the origin text is correct)",
+      "false-correction":
+        "False correction (both the original text and the suggestion are wrong)",
+      "too-little-context": "Not enough context around the suggestion",
+      "should-be-ignored":
+        "This text shouldn't be checked (foreign language, markup, etc.)",
+      other: "Other",
+    },
   }),
 
   methods: {

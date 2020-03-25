@@ -1,15 +1,18 @@
 <template>
   <div class="game">
     <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
-    <b-alert v-if="!error && !tiles.length" show variant="info"
-      >There are no suggestions for the moment.</b-alert
-    >
-    <b-alert v-if="!error && tiles.length && !username" show variant="warning"
+    <b-alert v-if="!error && !tiles.length" show variant="info">
+      There are no suggestions for the moment.
+    </b-alert>
+    <b-alert
+      v-if="!error && tiles.length && !accessTokens.length"
+      show
+      variant="warning"
       >You need to be logged to play this game. Click on the button on the top
-      right of this page!</b-alert
-    >
+      right of this page!
+    </b-alert>
     <TileList
-      :disabled="!username"
+      :disabled="!accessTokens.length"
       :tiles="tiles"
       :activeTile="activeTile"
       @acceptSuggestionEdit="applySuggestionEditDecision(true)"
@@ -22,7 +25,7 @@
 <script>
 import TileList from "@/components/TileList.vue";
 import axios from "axios";
-import { mapState } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 export default {
   name: "game",
@@ -32,11 +35,13 @@ export default {
     error: null,
   }),
 
-  computed: mapState([
-    "LANGUAGETOOL_ENDPOINT_ROOT",
-    "userAccessToken",
-    "username",
-  ]),
+  computed: {
+    ...mapState([
+      "LANGUAGETOOL_ENDPOINT_ROOT",
+      "accessTokens",
+      "currentLanguageCode",
+    ]),
+  },
 
   mounted() {
     this.getSuggestions();
@@ -51,8 +56,8 @@ export default {
       let vm = this;
       const params = new URLSearchParams();
       params.append("suggestion_id", vm.activeTile.suggestion.id);
-      params.append("reason", reason);
-      params.append("accessToken", vm.userAccessToken);
+      params.append("reason", reason || null);
+      params.append("accessToken", vm.accessTokens.filter(accessToken => accessToken.languageCode === vm.currentLanguageCode)[0].accessToken);
       axios
         .post(
           `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/${
