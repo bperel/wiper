@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     currentLanguageCode: "fr",
     accessTokens: [],
-    LANGUAGETOOL_ENDPOINT_ROOT: "http://localhost:8081/v2/wikipedia",
+    LANGUAGETOOL_ENDPOINT_ROOT: process.env.VUE_APP_LANGUAGETOOL_ENDPOINT_ROOT,
   },
   mutations: {
     addAccessToken(state, { languageCode, username, accessToken }) {
