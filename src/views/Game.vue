@@ -57,7 +57,12 @@ export default {
       const params = new URLSearchParams();
       params.append("suggestion_id", vm.activeTile.suggestion.id);
       params.append("reason", reason || null);
-      params.append("accessToken", vm.accessTokens.filter(accessToken => accessToken.languageCode === vm.currentLanguageCode)[0].accessToken);
+      params.append(
+        "accessToken",
+        vm.accessTokens.filter(
+          ({ languageCode }) => languageCode === vm.currentLanguageCode
+        )[0].accessToken
+      );
       axios
         .post(
           `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/${
@@ -74,9 +79,11 @@ export default {
         .then(() => {
           this.nextTile();
         })
-        .catch(() => {
-          vm.error =
-            "Something wrong occurred while submitting the suggestion decision";
+        .catch(({ response }) => {
+          this.nextTile();
+          this.$bvToast.toast(
+            response.data.error || "An unexpected error occurred"
+          );
         });
     },
 
