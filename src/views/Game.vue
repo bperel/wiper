@@ -57,6 +57,7 @@ export default {
       const params = new URLSearchParams();
       params.append("suggestion_id", vm.activeTile.suggestion.id);
       params.append("reason", reason || null);
+      params.append("languageCode", vm.activeTile.article.languageCode);
       params.append(
         "accessToken",
         vm.accessTokens.filter(

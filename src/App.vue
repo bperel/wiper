@@ -43,7 +43,7 @@ export default {
   },
 
   mounted() {
-    this.readSessionUser();
+    this.readCookieUser();
   },
 
   methods: {
@@ -70,71 +70,87 @@ export default {
         });
     },
 
-    getLanguageCodeFromCookieWithPrefix(prefix) {
+    getLanguageCodeFromCookiesWithPrefix(prefix) {
       return this.$cookies
         .keys()
         .filter((cookieName) => new RegExp(`^${prefix}`).test(cookieName))
-        .map((cookieName) => cookieName.match(`^${prefix}_([a-z]+)$`)[1])[0];
+        .map((cookieName) => cookieName.match(`^${prefix}_([a-z]+)$`)[1]);
     },
 
-    readSessionUser: function () {
+    readRequestTokenCookies() {
       let vm = this;
-      if (this.$route.query.oauth_verifier) {
-        const requestTokenLanguageCode = this.getLanguageCodeFromCookieWithPrefix(
-          "wiper_requestToken"
-        );
-        if (requestTokenLanguageCode) {
-          const requestTokenCookieKey = `wiper_requestToken_${requestTokenLanguageCode}`;
-          return axios
-            .get(
-              `${this.LANGUAGETOOL_ENDPOINT_ROOT}/login?oauth_verifier=${
-                vm.$route.query.oauth_verifier
-              }&requestToken=${vm.$cookies.get(
-                requestTokenCookieKey
-              )}&languageCode=${requestTokenLanguageCode}`
-            )
-            .then(({ data }) => {
-              const { accessToken } = data;
+      const requests = this.getLanguageCodeFromCookiesWithPrefix(
+        "wiper_requestToken"
+      ).map((languageCode) =>
+        axios.get(
+          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/login?oauth_verifier=${
+            vm.$route.query.oauth_verifier
+          }&requestToken=${vm.$cookies.get(
+            `wiper_requestToken_${languageCode}`
+          )}&languageCode=${languageCode}`
+        )
+      );
+      axios
+        .all(requests)
+        .then(
+          axios.spread((...responses) => {
+            responses.forEach(({ data }) => {
+              const { accessToken, languageCode } = data;
               vm.$cookies.set(
-                `wiper_${requestTokenLanguageCode}`,
+                `wiper_${languageCode}`,
                 accessToken,
                 60 * 60 * 24 * 30,
                 "/"
               );
-              vm.$cookies.remove(requestTokenCookieKey);
-              window.location.replace("/");
-            })
-            .catch(() => {
-              vm.error = "Something wrong occurred while attempting to login";
+              vm.$cookies.remove(`wiper_requestToken_${languageCode}`);
             });
-        }
-        return Promise.reject(new Error("No request token in cookies"));
-      } else {
-        const accessTokenLanguageCode = this.getLanguageCodeFromCookieWithPrefix(
-          "wiper"
-        );
-        if (accessTokenLanguageCode) {
-          const accessTokenCookieKey = `wiper_${accessTokenLanguageCode}`;
-          axios
-            .get(
-              `${
-                this.LANGUAGETOOL_ENDPOINT_ROOT
-              }/user?accessToken=${vm.$cookies.get(
-                accessTokenCookieKey
-              )}&languageCode=${accessTokenLanguageCode}`
-            )
-            .then(({ data }) => {
+            vm.readAccessTokenCookies();
+          })
+        )
+        .catch(() => {
+          vm.error = "Something wrong occurred while attempting to login";
+        });
+
+      return Promise.reject(new Error("No request token in cookies"));
+    },
+
+    readAccessTokenCookies() {
+      let vm = this;
+      const requests = this.getLanguageCodeFromCookiesWithPrefix(
+        "wiper"
+      ).map((languageCode) =>
+        axios.get(
+          `${
+            this.LANGUAGETOOL_ENDPOINT_ROOT
+          }/user?accessToken=${vm.$cookies.get(
+            `wiper_${languageCode}`
+          )}&languageCode=${languageCode}`
+        )
+      );
+      axios
+        .all(requests)
+        .then(
+          axios.spread((...responses) => {
+            responses.forEach(({ data }) => {
+              const { userName, languageCode } = data;
               vm.addAccessToken({
-                languageCode: accessTokenLanguageCode,
-                username: data.userName,
-                accessToken: vm.$cookies.get(accessTokenCookieKey),
+                languageCode: languageCode,
+                username: userName,
+                accessToken: vm.$cookies.get(`wiper_${languageCode}`),
               });
-            })
-            .catch(() => {
-              vm.error =
-                "Something wrong occurred while refusing the suggestion";
             });
-        }
+          })
+        )
+        .catch(() => {
+          vm.error = "Something wrong occurred while refusing the suggestion";
+        });
+    },
+
+    readCookieUser: function () {
+      if (this.$route.query.oauth_verifier) {
+        this.readRequestTokenCookies();
+      } else {
+        this.readAccessTokenCookies();
       }
       return Promise.reject(new Error("No session"));
     },

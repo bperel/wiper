@@ -9,11 +9,13 @@
         class="btn btn-outline-info"
         disabled
       >
-        {{ accessTokenData.username }}&nbsp;<b-badge>{{ accessTokenData.languageCode }}</b-badge>
+        {{ accessTokenData.username }}&nbsp;<b-badge>{{
+          accessTokenData.languageCode
+        }}</b-badge>
       </button>
-      <b-dropdown v-if="!accessTokens.length" text="Login" right>
+      <b-dropdown text="Login" right>
         <b-dropdown-item
-          v-for="languageCode in supportedLanguages"
+          v-for="languageCode in supportedLanguagesWithoutAccessTokens"
           :key="languageCode"
           @click="$emit('initLogin', languageCode)"
           >Wikipedia {{ languageCode }}
@@ -30,9 +32,29 @@ export default {
   name: "Navbar",
   computed: {
     ...mapState(["accessTokens"]),
+    supportedLanguagesWithoutAccessTokens: function () {
+      return this.supportedLanguages.filter(
+        (supportedLanguage) =>
+          this.accessTokens
+            .map((accessToken) => accessToken.languageCode)
+            .indexOf(supportedLanguage) === -1
+      );
+    },
   },
   data: function () {
-    return { supportedLanguages: ["fr"] };
+    return {
+      supportedLanguages: [
+        "ca",
+        "de",
+        "en",
+        "fr",
+        "nl",
+        "pl",
+        "pt",
+        "ru",
+        "uk",
+      ],
+    };
   },
 };
 </script>
