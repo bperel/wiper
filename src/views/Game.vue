@@ -33,11 +33,7 @@ export default {
   }),
 
   computed: {
-    ...mapState([
-      "LANGUAGETOOL_ENDPOINT_ROOT",
-      "accessTokens",
-      "currentLanguageCode",
-    ]),
+    ...mapState(["LANGUAGETOOL_ENDPOINT_ROOT", "accessTokens"]),
   },
 
   watch: {
@@ -62,7 +58,8 @@ export default {
       params.append(
         "accessToken",
         vm.accessTokens.filter(
-          ({ languageCode }) => languageCode === vm.currentLanguageCode
+          ({ languageCode }) =>
+            languageCode === vm.activeTile.article.languageCode
         )[0].accessToken
       );
       axios
