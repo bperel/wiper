@@ -1,18 +1,15 @@
 <template>
   <div class="game">
     <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
-    <b-alert v-if="!error && !tiles.length" show variant="info">
-      There are no suggestions for the moment.
-    </b-alert>
-    <b-alert
-      v-if="!error && tiles.length && !accessTokens.length"
-      show
-      variant="warning"
+    <b-alert v-else-if="!error && !accessTokens.length" show variant="warning"
       >You need to be logged to play this game. Click on the button on the top
       right of this page!
     </b-alert>
+    <b-alert v-else-if="!error && !tiles.length" show variant="info">
+      There are no suggestions for the moment.
+    </b-alert>
     <TileList
-      :disabled="!accessTokens.length"
+      v-else
       :tiles="tiles"
       :activeTile="activeTile"
       @acceptSuggestionEdit="applySuggestionEditDecision(true)"
@@ -43,8 +40,12 @@ export default {
     ]),
   },
 
-  mounted() {
-    this.getSuggestions();
+  watch: {
+    accessTokens: function (newValue) {
+      if (newValue.length) {
+        this.getSuggestions();
+      }
+    },
   },
 
   methods: {
@@ -99,7 +100,12 @@ export default {
     getSuggestions: function () {
       let vm = this;
       axios
-        .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions`)
+        .get(
+          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions?languageCodes=` +
+            this.accessTokens
+              .map((accessToken) => accessToken.languageCode)
+              .join(",")
+        )
         .then(({ data }) => {
           vm.tiles = vm.tiles.concat(data.suggestions);
           vm.setFirstTileAsActive();

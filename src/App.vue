@@ -119,19 +119,21 @@ export default {
       const requests = this.getLanguageCodeFromCookiesWithPrefix(
         "wiper"
       ).map((languageCode) =>
-        axios.get(
-          `${
-            this.LANGUAGETOOL_ENDPOINT_ROOT
-          }/user?accessToken=${vm.$cookies.get(
-            `wiper_${languageCode}`
-          )}&languageCode=${languageCode}`
-        )
+        axios
+          .get(
+            `${
+              this.LANGUAGETOOL_ENDPOINT_ROOT
+            }/user?accessToken=${vm.$cookies.get(
+              `wiper_${languageCode}`
+            )}&languageCode=${languageCode}`
+          )
+          .catch(() => null)
       );
-      axios
-        .all(requests)
-        .then(
-          axios.spread((...responses) => {
-            responses.forEach(({ data }) => {
+      axios.all(requests).then(
+        axios.spread((...responses) => {
+          responses
+            .filter((response) => !!response)
+            .forEach(({ data }) => {
               const { userName, languageCode } = data;
               vm.addAccessToken({
                 languageCode: languageCode,
@@ -139,11 +141,8 @@ export default {
                 accessToken: vm.$cookies.get(`wiper_${languageCode}`),
               });
             });
-          })
-        )
-        .catch(() => {
-          vm.error = "Something wrong occurred while refusing the suggestion";
-        });
+        })
+      );
     },
 
     readCookieUser: function () {
