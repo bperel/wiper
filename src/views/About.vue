@@ -6,7 +6,14 @@
       <br />
       Each decision counts for one contribution on Wikipedia.
     </p>
-    <chart :options="areaChart"></chart>
+    <b-card-group deck>
+      <b-card title="Decision breakdown">
+        <chart :options="areaChart"></chart>
+      </b-card>
+      <b-card title="Top contributors">
+        <b-table striped hover :items="contributors"></b-table>
+      </b-card>
+    </b-card-group>
   </div>
 </template>
 <script>
@@ -14,11 +21,12 @@ import axios from "axios";
 import { mapState } from "vuex";
 
 export default {
-  name: "HelloWorld",
+  name: "About",
   computed: {
     ...mapState(["LANGUAGETOOL_ENDPOINT_ROOT"]),
   },
   data: () => ({
+    contributors: [],
     areaChart: {
       xAxis: {
         data: [],
@@ -26,44 +34,26 @@ export default {
       yAxis: {
         type: "value",
       },
-      legend: {
-        data: ["Approved", "Denied"],
-      },
       tooltip: {
         show: true,
         trigger: "axis",
       },
-      toolbox: {
-        show: true,
-        feature: {
-          mark: { show: true },
-          dataView: { show: true, readOnly: false },
-          magicType: { show: true, type: ["line", "bar", "stack", "tiled"] },
-          restore: { show: true },
-        },
-      },
-      grid: {
-        left: "3%",
-        right: "4%",
-        bottom: "3%",
-        containLabel: true,
-      },
       series: [
-        {
-          name: "Approved",
-          type: "line",
-          stack: "Decisions",
-          areaStyle: {
-            color: "green",
-          },
-          data: [],
-        },
         {
           name: "Denied",
           type: "line",
           stack: "Decisions",
           areaStyle: {
-            color: "red",
+            color: "#f00",
+          },
+          data: [],
+        },
+        {
+          name: "Approved",
+          type: "line",
+          stack: "Decisions",
+          areaStyle: {
+            color: "#080",
           },
           data: [],
         },
@@ -76,16 +66,18 @@ export default {
     axios
       .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/stats`)
       .then(({ data }) => {
-        const stats = data.stats.filter((value) => !!value.date);
+        const stats = data.decisions.filter((value) => !!value.date);
         vm.areaChart.xAxis.data = stats
           .map((value) => value.date)
           .filter((value, index, self) => self.indexOf(value) === index);
-        vm.areaChart.series[0].data = stats
+        vm.areaChart.series[1].data = stats
           .filter((value) => value.applied === true)
           .map((value) => value.count);
-        vm.areaChart.series[1].data = stats
+        vm.areaChart.series[0].data = stats
           .filter((value) => value.applied === false)
           .map((value) => value.count);
+
+        vm.contributors = data.contributors;
       })
       .catch(() => {
         vm.error = "Something wrong occurred while fetching the statistics";
@@ -93,3 +85,8 @@ export default {
   },
 };
 </script>
+<style scoped>
+.echarts {
+  display: inline-block;
+}
+</style>
