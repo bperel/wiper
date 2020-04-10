@@ -20,6 +20,16 @@
 import axios from "axios";
 import { mapState } from "vuex";
 
+Date.prototype.addDay = function () {
+  const date = new Date(this.valueOf());
+  date.setDate(date.getDate() + 1);
+  return date;
+};
+
+Date.prototype.toShortISOString = function () {
+  return this.toISOString().match(/^[^T]+/)[0];
+};
+
 export default {
   name: "About",
   computed: {
@@ -66,16 +76,24 @@ export default {
     axios
       .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/stats`)
       .then(({ data }) => {
-        const stats = data.decisions.filter((value) => !!value.date);
-        vm.areaChart.xAxis.data = stats
-          .map((value) => value.date)
-          .filter((value, index, self) => self.indexOf(value) === index);
-        vm.areaChart.series[1].data = stats
-          .filter((value) => value.applied === true)
-          .map((value) => value.count);
-        vm.areaChart.series[0].data = stats
-          .filter((value) => value.applied === false)
-          .map((value) => value.count);
+        const minDate = data.decisions[0].date;
+        const maxDate = data.decisions[data.decisions.length - 1].date;
+        let currentDate = new Date(minDate);
+        while (currentDate <= new Date(maxDate)) {
+          vm.areaChart.xAxis.data.push(currentDate.toShortISOString());
+          [false, true].forEach((applied, serieIndex) => {
+            vm.areaChart.series[serieIndex].data.push(
+              data.decisions
+                .filter(
+                  (value) =>
+                    value.date === currentDate.toShortISOString() &&
+                    value.applied === applied
+                )
+                .map((value) => value.count)[0] || 0
+            );
+          });
+          currentDate = currentDate.addDay();
+        }
 
         vm.contributors = data.contributors;
       })
