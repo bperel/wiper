@@ -3,20 +3,23 @@
     <a id="brand" class="navbar-brand" href="javascript:void(0)"
       >WiPeR<sup>alpha</sup></a
     >
-    <button
-      :key="accessTokenData.languageCode"
-      v-for="accessTokenData in accessTokens"
-      class="btn btn-outline-info"
-      disabled
-    >
-      {{ accessTokenData.username }}&nbsp;<b-badge>{{
-        accessTokenData.languageCode
-      }}</b-badge>
-    </button>
-    <b-dropdown id="login" text="Login">
+    <div>
+      <button
+        :key="accessTokenData.languageCode"
+        v-for="accessTokenData in accessTokens"
+        class="btn btn-outline-info"
+        disabled
+      >
+        {{ accessTokenData.username }}&nbsp;<b-badge>{{
+          accessTokenData.languageCode
+        }}</b-badge>
+      </button>
+    </div>
+    <b-dropdown right id="login" text="Login">
       <b-dropdown-item
-        v-for="languageCode in supportedLanguagesWithoutAccessTokens"
+        v-for="languageCode in supportedLanguages"
         :key="languageCode"
+        :disabled="isAlreadyLoggedIn(languageCode)"
         @click="$emit('initLogin', languageCode)"
         >Wikipedia {{ languageCode }}
       </b-dropdown-item>
@@ -31,14 +34,6 @@ export default {
   name: "Navbar",
   computed: {
     ...mapState(["accessTokens"]),
-    supportedLanguagesWithoutAccessTokens: function () {
-      return this.supportedLanguages.filter(
-        (supportedLanguage) =>
-          this.accessTokens
-            .map((accessToken) => accessToken.languageCode)
-            .indexOf(supportedLanguage) === -1
-      );
-    },
   },
   data: function () {
     return {
@@ -54,6 +49,15 @@ export default {
         "uk",
       ],
     };
+  },
+  methods: {
+    isAlreadyLoggedIn: function (supportedLanguage) {
+      return (
+        this.accessTokens
+          .map((accessToken) => accessToken.languageCode)
+          .indexOf(supportedLanguage) !== -1
+      );
+    },
   },
 };
 </script>
