@@ -117,12 +117,13 @@ export default {
 
 <style lang="scss">
 .gametitle {
+  border: 3px solid #888;
   border-radius: 10px;
   box-shadow: 10px 10px 5px #888;
-  margin-bottom: 20px;
   padding: 5px;
   min-height: 20px;
   width: 100%;
+  margin: 20px 0 !important;
 
   &.active {
     border: 3px solid #2966b8;
