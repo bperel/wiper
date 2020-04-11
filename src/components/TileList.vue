@@ -12,13 +12,10 @@
       >
         <b-col md="12" class="section">
           <div class="sec_text_title">
-            <a class="external" target="_blank" :href="tile.article.sourceuri">
+            <a class="external" target="_blank" :href="tile.article.url">
               {{ tile.article.title }}
+              <b-badge>{{ tile.article.languageCode }}</b-badge>
             </a>
-            <small
-              >[{{ tile.suggestion.sourceType }}
-              {{ tile.suggestion.languageCode }}]</small
-            >
           </div>
           <div class="item_preview">
             <div class="item_label" v-html="tile.suggestion.message"></div>
@@ -124,6 +121,10 @@ export default {
   min-height: 20px;
   width: 100%;
   margin: 20px 0 !important;
+
+  a {
+    font-size: 0.8em;
+  }
 
   &.active {
     border: 3px solid #2966b8;
