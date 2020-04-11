@@ -37,10 +37,13 @@ export default {
   },
 
   watch: {
-    accessTokens: function (newValue) {
-      if (newValue.length) {
-        this.getSuggestions();
-      }
+    accessTokens: {
+      immediate: true,
+      handler: function (newValue) {
+        if (newValue.length) {
+          this.getSuggestions();
+        }
+      },
     },
   },
 
