@@ -47,7 +47,7 @@ export default {
   },
 
   methods: {
-    ...mapMutations(["setUsername", "addAccessToken"]),
+    ...mapMutations(["setUsername", "initAccessTokens", "addAccessToken"]),
     initLogin: function (languageCode) {
       let vm = this;
       axios
@@ -131,6 +131,7 @@ export default {
       );
       axios.all(requests).then(
         axios.spread((...responses) => {
+          vm.initAccessTokens();
           responses
             .filter((response) => !!response)
             .forEach(({ data }) => {

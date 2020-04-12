@@ -10,9 +10,9 @@
         class="btn btn-outline-info"
         disabled
       >
-        {{ accessTokenData.username }}&nbsp;<b-badge>{{
-          accessTokenData.languageCode
-        }}</b-badge>
+        {{ accessTokenData.username }}
+        &nbsp;
+        <b-badge>{{ accessTokenData.languageCode }}</b-badge>
       </button>
     </div>
     <b-dropdown right id="login" text="Login">
@@ -53,7 +53,7 @@ export default {
   methods: {
     isAlreadyLoggedIn: function (supportedLanguage) {
       return (
-        this.accessTokens
+        (this.accessTokens || [])
           .map((accessToken) => accessToken.languageCode)
           .indexOf(supportedLanguage) !== -1
       );

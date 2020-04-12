@@ -1,11 +1,14 @@
 <template>
   <div class="game">
     <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
-    <b-alert v-else-if="!error && !accessTokens.length" show variant="warning"
+    <b-alert
+      v-else-if="!error && accessTokens && !accessTokens.length"
+      show
+      variant="warning"
       >You need to be logged to play this game. Click on the button on the top
       right of this page!
     </b-alert>
-    <b-alert v-else-if="!error && !tiles.length" show variant="info">
+    <b-alert v-else-if="!error && tiles && !tiles.length" show variant="info">
       There are no suggestions for the moment.
     </b-alert>
     <TileList
@@ -27,7 +30,7 @@ import { mapGetters, mapState } from "vuex";
 export default {
   name: "game",
   data: () => ({
-    tiles: [],
+    tiles: null,
     activeTile: null,
     error: null,
   }),
@@ -40,7 +43,7 @@ export default {
     accessTokens: {
       immediate: true,
       handler: function (newValue) {
-        if (newValue.length) {
+        if (newValue && newValue.length) {
           this.getSuggestions();
         }
       },
@@ -107,7 +110,7 @@ export default {
               .join(",")
         )
         .then(({ data }) => {
-          vm.tiles = vm.tiles.concat(data.suggestions);
+          vm.tiles = (vm.tiles || []).concat(data.suggestions);
           vm.setFirstTileAsActive();
         })
         .catch(() => {
