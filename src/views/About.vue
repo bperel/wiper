@@ -76,10 +76,8 @@ export default {
     axios
       .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/stats`)
       .then(({ data }) => {
-        const minDate = data.decisions[0].date;
-        const maxDate = data.decisions[data.decisions.length - 1].date;
-        let currentDate = new Date(minDate);
-        while (currentDate <= new Date(maxDate)) {
+        let currentDate = new Date(data.decisions[0].date);
+        while (currentDate <= new Date().addDay()) {
           vm.areaChart.xAxis.data.push(currentDate.toShortISOString());
           [false, true].forEach((applied, serieIndex) => {
             vm.areaChart.series[serieIndex].data.push(
