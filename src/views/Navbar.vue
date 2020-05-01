@@ -4,16 +4,20 @@
       >WiPeR<sup>alpha</sup></a
     >
     <div>
-      <button
+      <b-dropdown
         :key="accessTokenData.languageCode"
         v-for="accessTokenData in accessTokens"
-        class="btn btn-outline-info"
-        disabled
+        variant="outline-secondary"
       >
-        {{ accessTokenData.username }}
-        &nbsp;
-        <b-badge>{{ accessTokenData.languageCode }}</b-badge>
-      </button>
+        <span slot="button-content">
+          {{ accessTokenData.username }}
+          &nbsp;
+          <b-badge>{{ accessTokenData.languageCode }}</b-badge>
+        </span>
+        <b-dropdown-item @click="$emit('logout', accessTokenData)">
+          Logout
+        </b-dropdown-item>
+      </b-dropdown>
     </div>
     <b-dropdown right id="login" text="Login">
       <b-dropdown-item

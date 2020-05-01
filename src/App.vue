@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Navbar @initLogin="initLogin" />
+    <Navbar @initLogin="initLogin" @logout="logout" />
     <div id="nav">
       <router-link to="/">Game</router-link> |
       <router-link to="/about">About</router-link>
@@ -47,7 +47,7 @@ export default {
   },
 
   methods: {
-    ...mapMutations(["setUsername", "initAccessTokens", "addAccessToken"]),
+    ...mapMutations(["initAccessTokens", "addAccessToken"]),
     initLogin: function (languageCode) {
       let vm = this;
       axios
@@ -67,6 +67,22 @@ export default {
         .catch(() => {
           vm.error =
             "Something wrong occurred while attempting to authorize the user";
+        });
+    },
+
+    logout: function ({ languageCode, accessToken }) {
+      let vm = this;
+      axios
+        .get(
+          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/logout?accessToken=${accessToken}`
+        )
+        .then(() => {
+          vm.$cookies.remove(`wiper_${languageCode}`);
+          window.location.reload();
+        })
+        .catch(() => {
+          vm.error =
+            "Something wrong occurred while attempting to logout the user";
         });
     },
 
@@ -103,6 +119,7 @@ export default {
                 "/"
               );
               vm.$cookies.remove(`wiper_requestToken_${languageCode}`);
+              vm.$router.push(vm.$route.path);
             });
             vm.readAccessTokenCookies();
           })
