@@ -5,6 +5,17 @@
       Wikipedia by simply accepting or refusing suggestions.
       <br />
       Each decision counts for one contribution on Wikipedia.
+      <br /><br />
+      Want to know more about this project or report issues?
+      <br />
+      The website's code is hosted on
+      <a target="_blank" href="https://github.com/bperel/wiper">bperel/wiper</a>
+      whereas the backend is based on
+      <a target="_blank" href="https://languagetool.org">languagetool</a> and
+      hosted on
+      <a target="_blank" href="https://github.com/bperel/languagetool-wiper"
+        >bperel/languagetool</a
+      >.
     </p>
     <b-card-group deck>
       <b-card title="Decision breakdown">
