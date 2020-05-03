@@ -24,6 +24,22 @@
       <b-card title="Top contributors">
         <b-table striped hover :items="contributors"></b-table>
       </b-card>
+      <b-card class="pending-suggestions" title="Undecided suggestions">
+        <div id="counters">
+          <div
+            class="counter"
+            :key="pendingSuggestionForLanguage.language"
+            v-for="pendingSuggestionForLanguage in pendingSuggestions"
+          >
+            <b-badge
+              >Wikipedia {{ pendingSuggestionForLanguage.language }}</b-badge
+            >
+            <h2 class="timer count-title count-number">
+              {{ pendingSuggestionForLanguage.count }}
+            </h2>
+          </div>
+        </div>
+      </b-card>
     </b-card-group>
   </div>
 </template>
@@ -47,6 +63,7 @@ export default {
     ...mapState(["LANGUAGETOOL_ENDPOINT_ROOT"]),
   },
   data: () => ({
+    pendingSuggestions: [],
     contributors: [],
     areaChart: {
       xAxis: {
@@ -87,6 +104,9 @@ export default {
     axios
       .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/stats`)
       .then(({ data }) => {
+        vm.contributors = data.contributors;
+        vm.pendingSuggestions = data.pendingSuggestions;
+
         let currentDate = new Date(data.decisions[0].date);
         while (currentDate <= new Date().addDay()) {
           vm.areaChart.xAxis.data.push(currentDate.toShortISOString());
@@ -103,8 +123,6 @@ export default {
           });
           currentDate = currentDate.addDay();
         }
-
-        vm.contributors = data.contributors;
       })
       .catch(() => {
         vm.error = "Something wrong occurred while fetching the statistics";
@@ -112,8 +130,25 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style scoped lang="scss">
 .echarts {
   display: inline-block;
+}
+
+#counters {
+  background-color: #f5f5f5;
+  .counter {
+    display: inline-block;
+    padding: 20px;
+    border-radius: 5px;
+
+    .count-title {
+      font-size: 40px;
+      font-weight: normal;
+      margin-top: 10px;
+      margin-bottom: 0;
+      text-align: center;
+    }
+  }
 }
 </style>
