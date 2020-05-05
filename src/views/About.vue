@@ -19,7 +19,16 @@
     </p>
     <b-card-group deck>
       <b-card title="Decision breakdown">
-        <chart :options="areaChart"></chart>
+        <chart :options="decisionsPerDay"></chart>
+      </b-card>
+      <b-card title="Decision percentage per month">
+        <b-card-header
+          >This represents the percentage of "Fix" decisions in proportion to
+          the total amount of decisions made by users.<br />
+          It is usually a good indicator of the quality of the
+          suggestions.</b-card-header
+        >
+        <chart :options="decisionPercentagesPerMonth"></chart>
       </b-card>
       <b-card title="Top contributors">
         <b-table striped hover :items="contributors"></b-table>
@@ -65,7 +74,39 @@ export default {
   data: () => ({
     pendingSuggestions: [],
     contributors: [],
-    areaChart: {
+    decisionsPerDay: {
+      xAxis: {
+        data: [],
+      },
+      yAxis: {
+        type: "value",
+      },
+      tooltip: {
+        show: true,
+        trigger: "axis",
+      },
+      series: [
+        {
+          name: "Denied",
+          type: "line",
+          stack: "Decisions",
+          areaStyle: {
+            color: "#f00",
+          },
+          data: [],
+        },
+        {
+          name: "Approved",
+          type: "line",
+          stack: "Decisions",
+          areaStyle: {
+            color: "#080",
+          },
+          data: [],
+        },
+      ],
+    },
+    decisionPercentagesPerMonth: {
       xAxis: {
         data: [],
       },
@@ -106,12 +147,21 @@ export default {
       .then(({ data }) => {
         vm.contributors = data.contributors;
         vm.pendingSuggestions = data.pendingSuggestions;
+        data.decisionPercentages.forEach(({ month, appliedPercentage }) => {
+          vm.decisionPercentagesPerMonth.xAxis.data.push(month);
+          let appliedPercentages = [100 - appliedPercentage, appliedPercentage];
+          [false, true].forEach((applied, serieIndex) => {
+            vm.decisionPercentagesPerMonth.series[serieIndex].data.push(
+              appliedPercentages[serieIndex]
+            );
+          });
+        });
 
         let currentDate = new Date(data.decisions[0].date);
         while (currentDate <= new Date().addDay()) {
-          vm.areaChart.xAxis.data.push(currentDate.toShortISOString());
+          vm.decisionsPerDay.xAxis.data.push(currentDate.toShortISOString());
           [false, true].forEach((applied, serieIndex) => {
-            vm.areaChart.series[serieIndex].data.push(
+            vm.decisionsPerDay.series[serieIndex].data.push(
               data.decisions
                 .filter(
                   (value) =>
