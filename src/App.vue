@@ -2,8 +2,8 @@
   <div id="app">
     <Navbar @initLogin="initLogin" @logout="logout" />
     <div id="nav">
-      <router-link to="/">Game</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link :to="{ name: 'home' }">Game</router-link> |
+      <router-link :to="{ name: 'about' }">About</router-link>
     </div>
     <router-view />
   </div>
