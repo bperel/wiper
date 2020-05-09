@@ -28,7 +28,7 @@
           It is usually a good indicator of the quality of the
           suggestions.</b-card-header
         >
-        <chart :options="decisionPercentagesPerMonth"></chart>
+        <chart :options="decisionPercentagesPerWeek"></chart>
       </b-card>
       <b-card title="Top contributors">
         <b-table striped hover :items="contributors"></b-table>
@@ -106,7 +106,7 @@ export default {
         },
       ],
     },
-    decisionPercentagesPerMonth: {
+    decisionPercentagesPerWeek: {
       xAxis: {
         data: [],
       },
@@ -148,10 +148,10 @@ export default {
         vm.contributors = data.contributors;
         vm.pendingSuggestions = data.pendingSuggestions;
         data.decisionPercentages.forEach(({ month, appliedPercentage }) => {
-          vm.decisionPercentagesPerMonth.xAxis.data.push(month);
+          vm.decisionPercentagesPerWeek.xAxis.data.push(month);
           let appliedPercentages = [100 - appliedPercentage, appliedPercentage];
           [false, true].forEach((applied, serieIndex) => {
-            vm.decisionPercentagesPerMonth.series[serieIndex].data.push(
+            vm.decisionPercentagesPerWeek.series[serieIndex].data.push(
               appliedPercentages[serieIndex]
             );
           });
@@ -180,9 +180,16 @@ export default {
   },
 };
 </script>
-<style scoped lang="scss">
+<style lang="scss">
 .echarts {
   display: inline-block;
+  width: 100% !important;
+
+  > div,
+  > canvas {
+    max-width: 100% !important;
+    width: initial !important;
+  }
 }
 
 #counters {
