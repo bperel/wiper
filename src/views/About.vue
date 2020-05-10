@@ -17,7 +17,7 @@
         >bperel/languagetool</a
       >.
     </p>
-    <b-card-group deck>
+    <b-card-group deck columns>
       <b-card title="Decision breakdown">
         <chart :options="decisionsPerDay"></chart>
       </b-card>
@@ -50,6 +50,18 @@
         </div>
       </b-card>
     </b-card-group>
+    <b-card-group deck columns>
+      <b-card
+        id="top-refused-categories"
+        title="Top refused suggestion categories"
+      >
+        <b-table striped hover :items="mostRefusedSuggestionCategories">
+          <template v-slot:cell(sampleErrorContext)="data">
+            <span v-html="data.item.sampleErrorContext"></span>
+          </template>
+        </b-table>
+      </b-card>
+    </b-card-group>
   </div>
 </template>
 <script>
@@ -74,6 +86,7 @@ export default {
   data: () => ({
     pendingSuggestions: [],
     contributors: [],
+    mostRefusedSuggestionCategories: [],
     decisionsPerDay: {
       xAxis: {
         data: [],
@@ -135,6 +148,13 @@ export default {
             color: "#080",
           },
           data: [],
+          label: {
+            formatter: function (params) {
+              return `${params.value}%`;
+            },
+            show: true,
+            position: "bottom",
+          },
         },
       ],
     },
@@ -146,13 +166,15 @@ export default {
       .get(`${this.LANGUAGETOOL_ENDPOINT_ROOT}/stats`)
       .then(({ data }) => {
         vm.contributors = data.contributors;
+        vm.mostRefusedSuggestionCategories =
+          data.mostRefusedSuggestionCategories;
         vm.pendingSuggestions = data.pendingSuggestions;
         data.decisionPercentages.forEach(({ month, appliedPercentage }) => {
           vm.decisionPercentagesPerWeek.xAxis.data.push(month);
           let appliedPercentages = [100 - appliedPercentage, appliedPercentage];
           [false, true].forEach((applied, serieIndex) => {
             vm.decisionPercentagesPerWeek.series[serieIndex].data.push(
-              appliedPercentages[serieIndex]
+              Math.round(appliedPercentages[serieIndex])
             );
           });
         });
@@ -206,6 +228,12 @@ export default {
       margin-bottom: 0;
       text-align: center;
     }
+  }
+}
+
+#top-refused-categories {
+  err {
+    text-decoration: underline;
   }
 }
 </style>
