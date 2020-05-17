@@ -166,6 +166,9 @@ export default {
     readCookieUser: function () {
       if (this.$route.query.oauth_verifier) {
         this.readRequestTokenCookies();
+      } else if (location.search.indexOf("oauth_verifier=") !== -1) {
+        // Fix hash position (https://github.com/vuejs/vue-router/issues/2125#issuecomment-519521424)
+        location.replace(location.pathname + location.hash + location.search);
       } else {
         this.readAccessTokenCookies();
       }
