@@ -122,7 +122,7 @@ export default {
   width: 100%;
   margin: 20px 0 !important;
 
-  a {
+  a.external {
     font-size: 0.8em;
   }
 
@@ -131,7 +131,7 @@ export default {
     color: #111111;
     background-color: #fffff8;
 
-    a {
+    a.external {
       color: #2966b8;
     }
   }

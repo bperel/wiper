@@ -1,5 +1,6 @@
 <template>
-  <pre class="html-diff" v-html="htmlDiff"></pre>
+  <b-spinner v-if="!htmlDiff" label="Loading"></b-spinner>
+  <iframe v-else :srcdoc="htmlDiff"></iframe>
 </template>
 <script>
 import axios from "axios";
@@ -10,33 +11,34 @@ import DiffMatchPatch, {
 } from "diff-match-patch";
 import { mapState } from "vuex";
 
-const diffToHtml = function (diffs) {
-  const html = [];
+const diffToHtml = (diffs) => {
   const pattern_amp = /&/g;
   const pattern_lt = /</g;
   const pattern_gt = />/g;
   const pattern_para = /\n/g;
-  for (let x = 0; x < diffs.length; x++) {
-    const op = diffs[x][0]; // Operation (insert, delete, equal)
-    const data = diffs[x][1]; // Text of change.
-    const text = data
-      .replace(pattern_amp, "&amp;")
-      .replace(pattern_lt, "&lt;")
-      .replace(pattern_gt, "&gt;")
-      .replace(pattern_para, "<br>");
-    switch (op) {
-      case DIFF_INSERT:
-        html[x] = `<ins>${text}</ins>`;
-        break;
-      case DIFF_DELETE:
-        html[x] = `<del>${text}</del>`;
-        break;
-      case DIFF_EQUAL:
-        html[x] = `<span>${text}</span>`;
-        break;
-    }
-  }
-  return html.join("");
+  return diffs
+    .map(([op, data]) => {
+      const text = data
+        .replace(pattern_amp, "&amp;")
+        .replace(pattern_lt, "&lt;")
+        .replace(pattern_gt, "&gt;")
+        .replace(pattern_para, "<br>");
+      switch (op) {
+        case DIFF_INSERT:
+          return `<ins>${text}</ins>`;
+        case DIFF_DELETE:
+          return `<del>${text}</del>`;
+        case DIFF_EQUAL:
+          return `<span>${text}</span>`;
+      }
+    })
+    .join("");
+};
+
+const diffCssMarkup = '<link rel="stylesheet" href="diff.css" />';
+
+String.prototype.toEscapedRegExp = function () {
+  return new RegExp(this.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"), "g");
 };
 
 export default {
@@ -64,6 +66,13 @@ export default {
         let diff = dmp.diff_main(data.originalWikitext, data.suggestedWikitext);
         dmp.diff_cleanupSemantic(diff);
         vm.htmlDiff = diffToHtml(diff);
+        if (data.originalHtml) {
+          vm.htmlDiff = data.originalHtml
+            .replace(data.originalWikitext.toEscapedRegExp(), vm.htmlDiff)
+            .replace("</head>", `${diffCssMarkup}</head>`);
+        } else {
+          vm.htmlDiff = `<html><head>${diffCssMarkup}</head><body>${vm.htmlDiff}</body></html>`;
+        }
         this.$emit("suggestion-diff-loaded");
       })
       .catch(() => {
@@ -75,14 +84,9 @@ export default {
 </script>
 
 <style lang="scss">
-.html-diff {
-  white-space: pre-wrap;
-
-  ins {
-    background: #e6ffe6;
-  }
-  del {
-    background: #ffe6e6;
-  }
+iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 </style>
