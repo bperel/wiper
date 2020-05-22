@@ -4,3 +4,7 @@ ins {
 del {
     background: #ffe6e6;
 }
+
+a  {
+    pointer-events: none;
+}
