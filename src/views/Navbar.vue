@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
     <a id="brand" class="navbar-brand" href="javascript:void(0)"
-      >WiPeR<sup>alpha</sup></a
+      >WiPeR<sup>beta</sup></a
     >
     <div>
       <b-dropdown
