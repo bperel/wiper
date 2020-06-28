@@ -53,11 +53,14 @@
     <b-card-group deck columns>
       <b-card
         id="top-refused-categories"
-        title="Top refused suggestion categories"
+        title="Top refused suggestion categories (last 2 weeks)"
       >
         <b-table striped hover :items="mostRefusedSuggestionCategories">
-          <template v-slot:cell(sampleErrorContext)="data">
-            <span v-html="data.item.sampleErrorContext"></span>
+          <template v-slot:cell(sampleSuggestionId)="data">
+            <SuggestionDiff :suggestion-id="data.item.sampleSuggestionId" />
+          </template>
+          <template v-slot:head(sampleSuggestionId)>
+            Sample
           </template>
         </b-table>
       </b-card>
@@ -67,6 +70,7 @@
 <script>
 import axios from "axios";
 import { mapState } from "vuex";
+import SuggestionDiff from "../components/SuggestionDiff";
 
 Date.prototype.addDay = function () {
   const date = new Date(this.valueOf());
@@ -80,6 +84,9 @@ Date.prototype.toShortISOString = function () {
 
 export default {
   name: "About",
+  components: {
+    SuggestionDiff,
+  },
   computed: {
     ...mapState(["LANGUAGETOOL_ENDPOINT_ROOT"]),
   },
