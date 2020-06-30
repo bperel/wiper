@@ -44,7 +44,6 @@ export default {
       supportedLanguages: [
         "ca",
         "de",
-        "en",
         "fr",
         "nl",
         "pl",
