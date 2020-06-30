@@ -21,7 +21,7 @@
       <b-card title="Decision breakdown">
         <chart :options="decisionsPerDay"></chart>
       </b-card>
-      <b-card title="Decision percentage per month">
+      <b-card title="Decision percentage">
         <b-card-header
           >This represents the percentage of "Fix" decisions in proportion to
           the total amount of decisions made by users.<br />
