@@ -16,10 +16,10 @@
     "diff-match-patch": "^1.0.5",
     "echarts": "^4.8.0",
     "vue": "^2.6.11",
-    "vue-cookies": "^1.7.0",
+    "vue-cookies": "^1.7.2",
     "vue-echarts": "^5.0.0-beta.0",
     "vue-router": "^3.3.4",
-    "vuex": "^3.4.0"
+    "vuex": "^3.5.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.4.6",
