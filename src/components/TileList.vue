@@ -6,8 +6,7 @@
         v-for="tile in tiles"
         :key="tile.suggestion.id"
         :class="{
-          active: activeTile.suggestion.id === tile.suggestion.id,
-          disabled,
+          active: readOnly || activeTile.suggestion.id === tile.suggestion.id,
         }"
       >
         <b-col md="12" class="section">
@@ -24,8 +23,10 @@
                 {{ tile.suggestion.ruleDescription }}
               </small>
               <SuggestionDiff
-                v-if="tile.suggestion.id === activeTile.suggestion.id"
-                :suggestion-id="activeTile.suggestion.id"
+                v-if="
+                  readOnly || tile.suggestion.id === activeTile.suggestion.id
+                "
+                :suggestion-id="tile.suggestion.id"
                 @suggestion-diff-loaded="ready = true"
               />
             </div>
@@ -36,8 +37,13 @@
             <b-col md="12" class="control">
               <b-btn-group size="lg">
                 <b-btn
+                  v-if="
+                    !isAppliedSuggestion(tile.suggestion) ||
+                    isAcceptedSuggestion(tile.suggestion)
+                  "
                   :disabled="
-                    !(tile.suggestion.id === activeTile.suggestion.id && ready)
+                    isAppliedSuggestion(tile.suggestion) ||
+                    !(tile.suggestion.id === tile.suggestion.id && ready)
                   "
                   size="lg"
                   variant="success"
@@ -45,28 +51,45 @@
                   >Fix</b-btn
                 >
                 <b-btn
+                  v-if="!isAppliedSuggestion(tile.suggestion)"
                   :disabled="
-                    !(tile.suggestion.id === activeTile.suggestion.id && ready)
+                    isAppliedSuggestion(tile.suggestion) ||
+                    !(tile.suggestion.id === tile.suggestion.id && ready)
                   "
                   size="lg"
                   variant="light"
                   @click="$emit('nextTile')"
                   >Skip</b-btn
                 >
+                <b-button
+                  v-if="isRefusedSuggestion(tile.suggestion)"
+                  size="lg"
+                  variant="primary"
+                  disabled
+                  >Do not fix<br />
+                  <small
+                    ><small>{{
+                      refusalReasons[tile.suggestion.appliedReason]
+                    }}</small></small
+                  ></b-button
+                >
                 <b-dropdown
+                  v-else-if="!isAppliedSuggestion(tile.suggestion)"
                   :disabled="
-                    !(tile.suggestion.id === activeTile.suggestion.id && ready)
+                    !(tile.suggestion.id === tile.suggestion.id && ready)
                   "
                   size="lg"
                   text="Do not fix"
                   variant="primary"
                 >
-                  <b-dropdown-item
-                    v-for="(value, key) in refusalReasons"
-                    :key="key"
-                    @click="refuseSuggestionEdit(key)"
-                    >{{ value }}
-                  </b-dropdown-item>
+                  <template v-if="!isAppliedSuggestion(tile.suggestion)">
+                    <b-dropdown-item
+                      v-for="(value, key) in refusalReasons"
+                      :key="key"
+                      @click="refuseSuggestionEdit(key)"
+                      >{{ value }}
+                    </b-dropdown-item></template
+                  >
                 </b-dropdown>
               </b-btn-group>
             </b-col>
@@ -83,7 +106,11 @@ import SuggestionDiff from "./SuggestionDiff";
 export default {
   name: "TileList",
   components: { SuggestionDiff },
-  props: ["activeTile", "tiles", "disabled"],
+  props: {
+    activeTile: Object,
+    tiles: Array,
+    readOnly: Boolean,
+  },
   data: () => ({
     ready: false,
     pendingSubmitSuggestion: null,
@@ -107,6 +134,15 @@ export default {
     refuseSuggestionEdit: function (reason) {
       this.$emit("refuseSuggestionEdit", { reason });
       this.ready = false;
+    },
+    isAppliedSuggestion: function (suggestion) {
+      return suggestion.applied != null;
+    },
+    isAcceptedSuggestion: function (suggestion) {
+      return suggestion.applied === true;
+    },
+    isRefusedSuggestion: function (suggestion) {
+      return suggestion.applied === false;
     },
   },
 };
@@ -146,6 +182,10 @@ export default {
         font-weight: bold !important;
       }
     }
+  }
+
+  .control {
+    text-align: center;
   }
 
   &.disabled {
