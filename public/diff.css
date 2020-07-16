@@ -8,3 +8,7 @@ del {
 a  {
     pointer-events: none;
 }
+
+figure {
+    width: 100% !important;
+}
