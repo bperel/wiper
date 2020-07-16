@@ -21,11 +21,14 @@
     </div>
     <b-dropdown right id="login" text="Login">
       <b-dropdown-item
-        v-for="languageCode in supportedLanguages"
+        v-for="(languageName, languageCode) in supportedLanguages"
         :key="languageCode"
         :disabled="isAlreadyLoggedIn(languageCode)"
         @click="$emit('initLogin', languageCode)"
-        >Wikipedia {{ languageCode }}
+      >
+        <b-badge>{{ languageCode }}</b-badge>
+        &nbsp;
+        {{ languageName }}
       </b-dropdown-item>
     </b-dropdown>
   </nav>
@@ -41,16 +44,16 @@ export default {
   },
   data: function () {
     return {
-      supportedLanguages: [
-        "ca",
-        "de",
-        "fr",
-        "nl",
-        "pl",
-        "pt",
-        "ru",
-        "uk",
-      ],
+      supportedLanguages: {
+        ca: "Català",
+        de: "Deutsch",
+        fr: "Français",
+        nl: "Nederlands",
+        pl: "Polski",
+        pt: "Português",
+        ru: "Русский",
+        uk: "Українська",
+      },
     };
   },
   methods: {
@@ -74,5 +77,10 @@ button[disabled] {
 #login {
   width: 100px;
   margin: 0;
+}
+.badge {
+  width: 25px;
+  padding-top: 5px;
+  vertical-align: middle;
 }
 </style>
