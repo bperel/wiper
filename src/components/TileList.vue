@@ -37,32 +37,23 @@
             <b-col md="12" class="control">
               <b-btn-group size="lg">
                 <b-btn
-                  v-if="
-                    !isAppliedSuggestion(tile.suggestion) ||
-                    isAcceptedSuggestion(tile.suggestion)
-                  "
-                  :disabled="
-                    isAppliedSuggestion(tile.suggestion) ||
-                    !(tile.suggestion.id === tile.suggestion.id && ready)
-                  "
+                  v-if="!readOnly || tile.suggestion.applied === true"
+                  :disabled="readOnly"
                   size="lg"
                   variant="success"
-                  @click="acceptSuggestionEdit"
+                  @click="$emit('applySuggestionDecision', 'accept')"
                   >Fix</b-btn
                 >
                 <b-btn
-                  v-if="!isAppliedSuggestion(tile.suggestion)"
-                  :disabled="
-                    isAppliedSuggestion(tile.suggestion) ||
-                    !(tile.suggestion.id === tile.suggestion.id && ready)
-                  "
+                  v-if="!readOnly || tile.suggestion.applied === null"
+                  :disabled="readOnly"
                   size="lg"
                   variant="light"
-                  @click="$emit('nextTile')"
+                  @click="$emit('applySuggestionDecision', 'skip')"
                   >Skip</b-btn
                 >
-                <b-button
-                  v-if="isRefusedSuggestion(tile.suggestion)"
+                <b-btn
+                  v-if="tile.suggestion.applied === false"
                   size="lg"
                   variant="primary"
                   disabled
@@ -71,10 +62,10 @@
                     ><small>{{
                       refusalReasons[tile.suggestion.appliedReason]
                     }}</small></small
-                  ></b-button
+                  ></b-btn
                 >
                 <b-dropdown
-                  v-else-if="!isAppliedSuggestion(tile.suggestion)"
+                  v-else-if="!readOnly"
                   :disabled="
                     !(tile.suggestion.id === tile.suggestion.id && ready)
                   "
@@ -82,14 +73,16 @@
                   text="Do not fix"
                   variant="primary"
                 >
-                  <template v-if="!isAppliedSuggestion(tile.suggestion)">
-                    <b-dropdown-item
-                      v-for="(value, key) in refusalReasons"
-                      :key="key"
-                      @click="refuseSuggestionEdit(key)"
-                      >{{ value }}
-                    </b-dropdown-item></template
-                  >
+                  <b-dropdown-item
+                    v-for="(value, key) in refusalReasons"
+                    :key="key"
+                    @click="
+                      $emit('applySuggestionDecision', 'refuse', {
+                        reason: key,
+                      })
+                    "
+                    >{{ value }}
+                  </b-dropdown-item>
                 </b-dropdown>
               </b-btn-group>
             </b-col>
@@ -124,27 +117,7 @@ export default {
         "This text shouldn't be checked (foreign language, markup, etc.)",
       other: "Other",
     },
-  }),
-
-  methods: {
-    acceptSuggestionEdit: function () {
-      this.$emit("acceptSuggestionEdit");
-      this.ready = false;
-    },
-    refuseSuggestionEdit: function (reason) {
-      this.$emit("refuseSuggestionEdit", { reason });
-      this.ready = false;
-    },
-    isAppliedSuggestion: function (suggestion) {
-      return suggestion.applied != null;
-    },
-    isAcceptedSuggestion: function (suggestion) {
-      return suggestion.applied === true;
-    },
-    isRefusedSuggestion: function (suggestion) {
-      return suggestion.applied === false;
-    },
-  },
+  })
 };
 </script>
 

@@ -2,22 +2,19 @@
   <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
     <div>
       <b-dropdown
-        :key="accessTokenData.languageCode"
-        v-for="accessTokenData in accessTokens"
+        v-if="accessTokens && Object.values(accessTokens).length"
         variant="outline-secondary"
       >
         <span slot="button-content">
-          {{ accessTokenData.username }}
-          &nbsp;
-          <b-badge>{{ accessTokenData.languageCode }}</b-badge>
+          Menu
         </span>
         <b-dropdown-item v-b-modal.modal-suggestion-history>
-          View choices
+          View choice history
           <b-modal
             hide-footer
             id="modal-suggestion-history"
-            title="Suggestion history (last 10 suggestions)"
-            @show="loadPastSuggestions(accessTokenData.languageCode)"
+            title="Decision history (last 10 suggestions)"
+            @show="loadPastSuggestions()"
           >
             <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
             <tile-list
@@ -29,9 +26,15 @@
             <template v-slot:modal-footer />
           </b-modal>
         </b-dropdown-item>
-        <b-dropdown-item @click="$emit('logout', accessTokenData)">
-          Logout
-        </b-dropdown-item>
+        <b-dropdown-group header="Logout">
+          <b-dropdown-item-button
+            :key="accessTokenData.languageCode"
+            v-for="accessTokenData in accessTokens"
+            @click="$emit('logout', accessTokenData)"
+            ><b-badge>{{ accessTokenData.languageCode }}</b-badge
+            >&nbsp;{{ supportedLanguages[accessTokenData.languageCode] }}
+          </b-dropdown-item-button>
+        </b-dropdown-group>
       </b-dropdown>
     </div>
     <a id="brand" class="navbar-brand" href="javascript:void(0)"
@@ -87,13 +90,20 @@ export default {
           .indexOf(supportedLanguage) !== -1
       );
     },
-    loadPastSuggestions(languageCode) {
+    loadPastSuggestions() {
       let vm = this;
       axios
         .get(
-          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions/past?languageCode=${languageCode}`
+          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions/past?` +
+            this.accessTokens
+              .map(
+                (accessToken) =>
+                  `${accessToken.languageCode}=${accessToken.accessToken}`
+              )
+              .join(",")
         )
         .then(({ data }) => {
+          vm.error = null;
           vm.pastSuggestions = data.suggestions;
         })
         .catch(() => {

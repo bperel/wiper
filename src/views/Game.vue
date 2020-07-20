@@ -15,9 +15,7 @@
       v-else
       :tiles="tiles"
       :activeTile="activeTile"
-      @acceptSuggestionEdit="applySuggestionEditDecision(true)"
-      @nextTile="nextTile()"
-      @refuseSuggestionEdit="applySuggestionEditDecision(false, $event.reason)"
+      @applySuggestionDecision="applySuggestionDecision"
     />
   </div>
 </template>
@@ -25,7 +23,7 @@
 <script>
 import TileList from "@/components/TileList.vue";
 import axios from "axios";
-import { mapGetters, mapState } from "vuex";
+import { mapState } from "vuex";
 
 export default {
   name: "game",
@@ -55,11 +53,13 @@ export default {
       this.activeTile = this.tiles[0];
     },
 
-    applySuggestionEditDecision: function (accept, reason) {
+    applySuggestionDecision: function (
+      decision,
+      { reason } = { reason: null }
+    ) {
       let vm = this;
       const params = new URLSearchParams();
       params.append("suggestion_id", vm.activeTile.suggestion.id);
-      params.append("reason", reason || null);
       params.append("languageCode", vm.activeTile.article.languageCode);
       params.append(
         "accessToken",
@@ -68,11 +68,12 @@ export default {
             languageCode === vm.activeTile.article.languageCode
         )[0].accessToken
       );
+      if (reason) {
+        params.append("reason", reason);
+      }
       axios
         .post(
-          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/${
-            accept ? "accept" : "refuse"
-          }`,
+          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/${decision}`,
           params,
           {
             headers: {
@@ -104,9 +105,12 @@ export default {
       let vm = this;
       axios
         .get(
-          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions?languageCodes=` +
+          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions?` +
             this.accessTokens
-              .map((accessToken) => accessToken.languageCode)
+              .map(
+                (accessToken) =>
+                  `${accessToken.languageCode}=${accessToken.accessToken}`
+              )
               .join(",")
         )
         .then(({ data }) => {
