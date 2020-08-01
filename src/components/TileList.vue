@@ -117,7 +117,7 @@ export default {
         "This text shouldn't be checked (foreign language, markup, etc.)",
       other: "Other",
     },
-  })
+  }),
 };
 </script>
 

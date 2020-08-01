@@ -1,6 +1,6 @@
 <template>
-  <b-spinner v-if="!htmlDiff" label="Loading"></b-spinner>
-  <iframe v-else :srcdoc="htmlDiff"></iframe>
+  <iframe v-if="htmlDiff" :srcdoc="htmlDiff"></iframe>
+  <b-spinner v-else label="Loading"></b-spinner>
 </template>
 <script>
 import axios from "axios";
