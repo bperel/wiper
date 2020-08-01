@@ -1,8 +1,37 @@
-ins {
-    background: #e6ffe6;
+body {
+    padding: 1rem;
 }
+
+del, ins {
+    text-decoration: initial;
+}
+
 del {
-    background: #ffe6e6;
+    background: #ee6969;
+}
+del::before, del::after {
+    color: #ee6969;
+}
+
+ins {
+    background: #99e899;
+}
+ins::before, ins::after {
+    color: #99e899;
+}
+
+del::before, del::after, ins::before, ins::after {
+    position: absolute;
+    font-weight: bold;
+    background: #fffff8;
+}
+del::before, ins::before {
+    content: '>';
+    left: 0;
+}
+del::after, ins::after {
+    content: '<';
+    right: 0;
 }
 
 a  {
