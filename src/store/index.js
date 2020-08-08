@@ -5,8 +5,9 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    accessTokens: null,
     LANGUAGETOOL_ENDPOINT_ROOT: process.env.VUE_APP_LANGUAGETOOL_ENDPOINT_ROOT,
+    accessTokens: null,
+    mostSkippedRules: [],
   },
   mutations: {
     initAccessTokens(state) {
@@ -15,6 +16,23 @@ export default new Vuex.Store({
     addAccessToken(state, { languageCode, username, accessToken }) {
       state.accessTokens.push({ languageCode, accessToken, username });
     },
+    setMostSkippedRules(state, mostSkippedRules) {
+      state.mostSkippedRules = mostSkippedRules;
+    },
+  },
+  getters: {
+    mostSkippedRulesLanguageCodes: (state) => [
+      ...new Set([
+        ...state.mostSkippedRules.map(
+          (skippedRule) => skippedRule.languageCode
+        ),
+      ]),
+    ],
+    languageWithAccessToken: (state) =>
+      state.accessTokens.map(
+        (accessToken) =>
+          `${accessToken.languageCode}=${accessToken.accessToken}`
+      ),
   },
   actions: {},
   modules: {},

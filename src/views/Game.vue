@@ -5,8 +5,8 @@
       v-else-if="!error && accessTokens && !accessTokens.length"
       show
       variant="warning"
-      >You need to be logged to play this game. Click on the button on the top
-      right of this page!
+      >You need to be logged in to play this game. Click on the "Accounts"
+      button on the top right of this page!
     </b-alert>
     <b-alert v-else-if="!error && tiles && !tiles.length" show variant="info">
       There are no suggestions for the moment.
@@ -23,7 +23,7 @@
 <script>
 import TileList from "@/components/TileList.vue";
 import axios from "axios";
-import { mapState } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 export default {
   name: "game",
@@ -34,13 +34,14 @@ export default {
   }),
 
   computed: {
+    ...mapGetters(["languageWithAccessToken"]),
     ...mapState(["LANGUAGETOOL_ENDPOINT_ROOT", "accessTokens"]),
   },
 
   watch: {
     accessTokens: {
       immediate: true,
-      handler: function (newValue) {
+      handler(newValue) {
         if (newValue && newValue.length) {
           this.getSuggestions();
         }
@@ -49,14 +50,11 @@ export default {
   },
 
   methods: {
-    setFirstTileAsActive: function () {
+    setFirstTileAsActive() {
       this.activeTile = this.tiles[0];
     },
 
-    applySuggestionDecision: function (
-      decision,
-      { reason } = { reason: null }
-    ) {
+    applySuggestionDecision(decision, { reason } = { reason: null }) {
       let vm = this;
       const params = new URLSearchParams();
       params.append("suggestion_id", vm.activeTile.suggestion.id);
@@ -93,7 +91,7 @@ export default {
         });
     },
 
-    nextTile: function () {
+    nextTile() {
       this.tiles.splice(0, 1);
       this.setFirstTileAsActive();
       if (this.tiles.length === 0) {
@@ -101,17 +99,12 @@ export default {
       }
     },
 
-    getSuggestions: function () {
+    getSuggestions() {
       let vm = this;
       axios
         .get(
           `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions?` +
-            this.accessTokens
-              .map(
-                (accessToken) =>
-                  `${accessToken.languageCode}=${accessToken.accessToken}`
-              )
-              .join(",")
+            this.languageWithAccessToken.join(",")
         )
         .then(({ data }) => {
           vm.tiles = (vm.tiles || []).concat(data.suggestions);
