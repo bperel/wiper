@@ -35,56 +35,20 @@
         <b-col md="12" class="control_box">
           <b-row>
             <b-col md="12" class="control">
-              <b-btn-group size="lg">
-                <b-btn
-                  v-if="!readOnly || tile.suggestion.applied === true"
-                  :disabled="readOnly"
-                  size="lg"
-                  variant="success"
-                  @click="$emit('applyDecision', { decision: 'accept' })"
-                  >Fix</b-btn
-                >
-                <b-btn
-                  v-if="!readOnly || tile.suggestion.applied === null"
-                  :disabled="readOnly"
-                  size="lg"
-                  variant="light"
-                  @click="$emit('applyDecision', { decision: 'skip' })"
-                  >Skip</b-btn
-                >
-                <b-btn
-                  v-if="tile.suggestion.applied === false"
-                  size="lg"
-                  variant="primary"
-                  disabled
-                  >Do not fix<br />
-                  <small
-                    ><small>{{
-                      refusalReasons[tile.suggestion.appliedReason]
-                    }}</small></small
-                  ></b-btn
-                >
-                <b-dropdown
-                  v-else-if="!readOnly"
-                  :disabled="
-                    !(tile.suggestion.id === tile.suggestion.id && ready)
-                  "
-                  size="lg"
-                  text="Do not fix"
-                  variant="primary"
-                >
-                  <b-dropdown-item
-                    v-for="(value, key) in refusalReasons"
-                    :key="key"
-                    @click="
-                      $emit('applyDecision', {
-                        decision: 'refuse',
-                        reason: key,
-                      })
-                    "
-                    >{{ value }}
-                  </b-dropdown-item>
-                </b-dropdown>
+              <DecisionButton
+                v-if="readOnly"
+                read-only
+                :decision="getDecisionFromApplied(tile.suggestion.applied)"
+                :decision-reason="tile.suggestion.appliedReason"
+              />
+              <b-btn-group v-else size="lg">
+                <DecisionButton
+                  v-for="decision in ['fix', 'skip', 'dontfix']"
+                  :key="decision"
+                  :decision="decision"
+                  :ready="ready"
+                  @apply-decision="$emit('apply-decision', $event)"
+                />
               </b-btn-group>
             </b-col>
           </b-row>
@@ -96,10 +60,12 @@
 
 <script>
 import SuggestionDiff from "./SuggestionDiff";
+import DecisionButton from "./DecisionButton";
+import { mapState } from "vuex";
 
 export default {
   name: "TileList",
-  components: { SuggestionDiff },
+  components: { DecisionButton, SuggestionDiff },
   props: {
     activeTile: Object,
     tiles: Array,
@@ -108,17 +74,15 @@ export default {
   data: () => ({
     ready: false,
     pendingSubmitSuggestion: null,
-    refusalReasons: {
-      "false-positive":
-        "False positive (the suggestion is wrong, the origin text is correct)",
-      "false-correction":
-        "False correction (both the original text and the suggestion are wrong)",
-      "too-little-context": "Not enough context around the suggestion",
-      "should-be-ignored":
-        "This text shouldn't be checked (foreign language, markup, etc.)",
-      other: "Other",
-    },
   }),
+  computed: {
+    ...mapState(["refusalReasons"]),
+  },
+  methods: {
+    getDecisionFromApplied(applied) {
+      return applied === null ? "skip" : applied === true ? "fix" : "dontfix";
+    },
+  },
 };
 </script>
 

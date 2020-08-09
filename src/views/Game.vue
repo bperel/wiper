@@ -22,10 +22,20 @@
         If you don't want Wiper to suggest you these kinds of suggestions, you
         can ignore them using the top-left menu.</b-alert
       >
+      <b-alert dismissible show variant="light">
+        Wiper found Wikipedia articles with potential spelling or grammar
+        issues.<br />
+        Click on <decision-button decision="fix" read-only /> to fix the issue
+        in the Wikipedia article, <br />
+        <decision-button decision="skip" read-only /> to ignore this specific
+        suggestion to your user, or <br />
+        <decision-button decision="dontfix" read-only /> to hide this suggestion
+        to all Wiper users.
+      </b-alert>
       <TileList
         :tiles="tiles"
         :activeTile="activeTile"
-        @applyDecision="applyDecision"
+        @apply-decision="applyDecision"
       />
     </template>
   </div>
@@ -35,6 +45,7 @@
 import TileList from "@/components/TileList.vue";
 import axios from "axios";
 import { mapActions, mapGetters, mapState } from "vuex";
+import DecisionButton from "../components/DecisionButton";
 
 export default {
   name: "game",
@@ -83,9 +94,10 @@ export default {
     },
   },
 
-  ...mapActions("tiles", ["applyDecision", "nextTile"]),
+  ...mapActions("tiles", ["apply-decision", "nextTile"]),
 
   components: {
+    DecisionButton,
     TileList,
   },
 };

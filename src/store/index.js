@@ -18,6 +18,16 @@ export default new Vuex.Store({
       ru: "Русский",
       uk: "Українська",
     },
+    refusalReasons: {
+      "false-positive":
+        "False positive (the suggestion is wrong, the origin text is correct)",
+      "false-correction":
+        "False correction (both the original text and the suggestion are wrong)",
+      "too-little-context": "Not enough context around the suggestion",
+      "should-be-ignored":
+        "This text shouldn't be checked (foreign language, markup, etc.)",
+      other: "Other",
+    },
     accessTokens: null,
   },
   mutations: {
