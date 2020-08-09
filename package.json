@@ -1,6 +1,6 @@
 {
   "name": "wiper",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -10,15 +10,15 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "bootstrap": "^4.5.0",
-    "bootstrap-vue": "^2.15.0",
+    "bootstrap": "^4.5.2",
+    "bootstrap-vue": "^2.16.0",
     "core-js": "^3.6.5",
     "diff-match-patch": "^1.0.5",
     "echarts": "^4.8.0",
     "vue": "^2.6.11",
-    "vue-cookies": "^1.7.2",
+    "vue-cookies": "^1.7.3",
     "vue-echarts": "^5.0.0-beta.0",
-    "vue-router": "^3.3.4",
+    "vue-router": "^3.4.2",
     "vuex": "^3.5.1"
   },
   "devDependencies": {
