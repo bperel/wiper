@@ -1,9 +1,9 @@
 <template>
   <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
-    <div>
+    <div style="text-align: left;">
       <b-dropdown
-        v-if="accessTokens && Object.values(accessTokens).length"
         variant="outline-secondary"
+        v-if="accessTokens && accessTokens.length"
       >
         <span slot="button-content">
           Menu
@@ -14,7 +14,7 @@
             hide-footer
             id="modal-suggestion-history"
             title="Decision history (last 10 suggestions)"
-            @show="loadPastSuggestions()"
+            @show="getPastSuggestions()"
           >
             <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
             <tile-list
@@ -26,7 +26,10 @@
             <template v-slot:modal-footer />
           </b-modal>
         </b-dropdown-item>
-        <b-dropdown-group header="Ignored rules">
+        <b-dropdown-group
+          v-if="mostSkippedRulesLanguageCodes.length"
+          header="Ignored rules"
+        >
           <b-dropdown-group
             :header="supportedLanguages[languageCode]"
             :key="languageCode"
@@ -42,13 +45,13 @@
             >
               <small>
                 <b-button
-                  @click.stop="toggleIgnoreRule(rule)"
+                  @click.stop="toggleIgnoreRule({ rule })"
                   pill
                   size="sm"
                   :variant="rule.ignored ? 'primary' : 'outline-primary'"
                   ><b-icon-check v-if="rule.ignored" />&nbsp;Never show this
                   rule (skipped {{ rule.count }} times)</b-button
-                >
+                >&nbsp;&nbsp;
                 {{ rule.description }}
               </small>
             </b-dropdown-text>
@@ -68,32 +71,28 @@
       <b-dropdown-item
         v-for="(languageName, languageCode) in supportedLanguages"
         :key="languageCode"
-        ><b-button
+      >
+        <b-badge>{{ languageCode }}</b-badge>
+        <span class="language-name">{{ languageName }}</span>
+        &nbsp;<b-button
           @click.stop="loginOrLogout(languageCode)"
           class="login-logout"
-          v-if="isAlreadyLoggedIn(languageCode)"
           pill
           size="sm"
-          variant="outline-danger"
-          >Logout</b-button
-        ><b-button
-          class="login-logout"
-          v-else
-          pill
-          size="sm"
-          variant="outline-primary"
-          >Login</b-button
-        >&nbsp;
-        <b-badge>{{ languageCode }}</b-badge>
-        &nbsp;
-        {{ languageName }}
+          :variant="
+            isAlreadyLoggedIn(languageCode)
+              ? 'outline-danger'
+              : 'outline-primary'
+          "
+          >{{ isAlreadyLoggedIn(languageCode) ? "Logout" : "Login" }}</b-button
+        >
       </b-dropdown-item>
     </b-dropdown>
   </nav>
 </template>
 
 <script>
-import { mapGetters, mapMutations, mapState } from "vuex";
+import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
 import axios from "axios";
 import TileList from "../components/TileList";
 import { BIconCheck } from "bootstrap-vue";
@@ -104,25 +103,19 @@ export default {
   computed: {
     ...mapState([
       "LANGUAGETOOL_ENDPOINT_ROOT",
+      "supportedLanguages",
       "accessTokens",
-      "mostSkippedRules",
     ]),
-    ...mapGetters(["languageWithAccessToken", "mostSkippedRulesLanguageCodes"]),
+    ...mapState("skippedRules", { mostSkippedRules: "list" }),
+    ...mapState("tiles", { pastSuggestions: "pastList" }),
+    ...mapGetters(["languageWithAccessToken"]),
+    ...mapGetters("skippedRules", {
+      mostSkippedRulesLanguageCodes: "languageCodes",
+    }),
   },
   data: function () {
     return {
       error: null,
-      pastSuggestions: {},
-      supportedLanguages: {
-        ca: "Català",
-        de: "Deutsch",
-        fr: "Français",
-        nl: "Nederlands",
-        pl: "Polski",
-        pt: "Português",
-        ru: "Русский",
-        uk: "Українська",
-      },
     };
   },
   watch: {
@@ -130,7 +123,7 @@ export default {
       immediate: true,
       async handler(newValue) {
         if (newValue && newValue.length) {
-          await this.getMostSkippedRules();
+          await this.$store.dispatch("skippedRules/loadList");
         }
       },
     },
@@ -148,55 +141,21 @@ export default {
         this.$emit("initLogin", languageCode);
       }
     },
-    isAlreadyLoggedIn(supportedLanguage) {
-      return (
-        (this.accessTokens || [])
-          .map((accessToken) => accessToken.languageCode)
-          .indexOf(supportedLanguage) !== -1
-      );
+    isAlreadyLoggedIn(languageCode) {
+      return (this.accessTokens || [])
+        .map((accessToken) => accessToken.languageCode)
+        .includes(languageCode);
     },
-    loadPastSuggestions() {
-      let vm = this;
-      axios
-        .get(
-          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions/past?` +
-            this.accessTokens
-              .map(
-                (accessToken) =>
-                  `${accessToken.languageCode}=${accessToken.accessToken}`
-              )
-              .join(",")
-        )
-        .then(({ data }) => {
-          vm.error = null;
-          vm.pastSuggestions = data.suggestions;
-        })
-        .catch(() => {
-          vm.error = "Something wrong occurred while fetching the suggestions";
-        });
+    async getPastSuggestions() {
+      try {
+        await this.$store.dispatch("tiles/getPastSuggestions");
+        this.error = null;
+      } catch {
+        this.error = "Something wrong occurred while fetching the suggestions";
+      }
     },
-    async toggleIgnoreRule(rule) {
-      await axios.request({
-        method: rule.ignored ? "delete" : "put",
-        url: `${this.LANGUAGETOOL_ENDPOINT_ROOT}/ignoredRule/${
-          rule.ignored ? "remove" : "add"
-        }?languageCode=${rule.languageCode}&ruleid=${rule.ruleid}&accessToken=${
-          this.accessTokens.find(
-            (accessToken) => accessToken.languageCode === rule.languageCode
-          ).accessToken
-        }`,
-      });
-      await this.getMostSkippedRules();
-    },
-    async getMostSkippedRules() {
-      const vm = this;
-      const { data } = await axios.get(
-        `${this.LANGUAGETOOL_ENDPOINT_ROOT}/mostSkipped?` +
-          this.languageWithAccessToken.join(",")
-      );
-      vm.setMostSkippedRules(data);
-    },
-    ...mapMutations(["setMostSkippedRules"]),
+    ...mapMutations("skippedRules", { setMostSkippedRules: "setList" }),
+    ...mapActions("skippedRules", ["toggleIgnoreRule"]),
   },
 };
 </script>
@@ -216,10 +175,15 @@ header + ul {
   white-space: nowrap;
 }
 
-#brand,
-#accounts {
+.navbar > * {
   width: 175px;
   margin: 0;
+}
+
+.language-name {
+  display: inline-block;
+  width: 90px;
+  margin-left: 8px;
 }
 
 .login-logout {

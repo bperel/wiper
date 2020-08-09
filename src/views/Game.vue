@@ -11,31 +11,38 @@
     <b-alert v-else-if="!error && tiles && !tiles.length" show variant="info">
       There are no suggestions for the moment.
     </b-alert>
-    <TileList
-      v-else
-      :tiles="tiles"
-      :activeTile="activeTile"
-      @applySuggestionDecision="applySuggestionDecision"
-    />
+    <template v-else>
+      <b-alert v-if="mostSkippedRulesNotIgnored.length" show variant="info"
+        >It looks like you have skipped the same type of suggestions many
+        times.<br />
+        If you don't want Wiper to suggest you these kinds of suggestions, you
+        can ignore them using the top-left menu.</b-alert
+      >
+      <TileList
+        :tiles="tiles"
+        :activeTile="activeTile"
+        @applyDecision="applyDecision"
+      />
+    </template>
   </div>
 </template>
 
 <script>
 import TileList from "@/components/TileList.vue";
 import axios from "axios";
-import { mapGetters, mapState } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 
 export default {
   name: "game",
   data: () => ({
-    tiles: null,
-    activeTile: null,
     error: null,
   }),
 
   computed: {
     ...mapGetters(["languageWithAccessToken"]),
+    ...mapGetters("skippedRules", { mostSkippedRulesNotIgnored: "notIgnored" }),
     ...mapState(["LANGUAGETOOL_ENDPOINT_ROOT", "accessTokens"]),
+    ...mapState("tiles", { tiles: "list", activeTile: "active" }),
   },
 
   watch: {
@@ -50,71 +57,28 @@ export default {
   },
 
   methods: {
-    setFirstTileAsActive() {
-      this.activeTile = this.tiles[0];
-    },
-
-    applySuggestionDecision(decision, { reason } = { reason: null }) {
-      let vm = this;
-      const params = new URLSearchParams();
-      params.append("suggestion_id", vm.activeTile.suggestion.id);
-      params.append("languageCode", vm.activeTile.article.languageCode);
-      params.append(
-        "accessToken",
-        vm.accessTokens.filter(
-          ({ languageCode }) =>
-            languageCode === vm.activeTile.article.languageCode
-        )[0].accessToken
-      );
-      if (reason) {
-        params.append("reason", reason);
-      }
-      axios
-        .post(
-          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestion/${decision}`,
-          params,
-          {
-            headers: {
-              "Content-Type":
-                "application/x-www-form-urlencoded; charset=UTF-8",
-            },
-          }
-        )
-        .then(() => {
-          this.nextTile();
-        })
-        .catch(({ response }) => {
-          this.nextTile();
-          this.$bvToast.toast(
-            response.data.error || "An unexpected error occurred"
+    async applyDecision({ decision, reason = null }) {
+      const vm = this;
+      await this.$store
+        .dispatch("tiles/applyDecision", { decision, reason })
+        .catch((response) => {
+          vm.$bvToast.toast(
+            (response || { message: null }).message ||
+              "An unexpected error occurred"
           );
         });
-    },
-
-    nextTile() {
-      this.tiles.splice(0, 1);
-      this.setFirstTileAsActive();
-      if (this.tiles.length === 0) {
-        this.getSuggestions();
-      }
+      vm.$store.dispatch("tiles/nextTile");
     },
 
     getSuggestions() {
-      let vm = this;
-      axios
-        .get(
-          `${this.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions?` +
-            this.languageWithAccessToken.join(",")
-        )
-        .then(({ data }) => {
-          vm.tiles = (vm.tiles || []).concat(data.suggestions);
-          vm.setFirstTileAsActive();
-        })
-        .catch(() => {
-          vm.error = "Something wrong occurred while fetching the suggestions";
-        });
+      const vm = this;
+      this.$store.dispatch("tiles/getSuggestions").catch(() => {
+        vm.error = "Something wrong occurred while fetching the suggestions";
+      });
     },
   },
+
+  ...mapActions("tiles", ["applyDecision", "nextTile"]),
 
   components: {
     TileList,

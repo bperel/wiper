@@ -41,7 +41,7 @@
                   :disabled="readOnly"
                   size="lg"
                   variant="success"
-                  @click="$emit('applySuggestionDecision', 'accept')"
+                  @click="$emit('applyDecision', { decision: 'accept' })"
                   >Fix</b-btn
                 >
                 <b-btn
@@ -49,7 +49,7 @@
                   :disabled="readOnly"
                   size="lg"
                   variant="light"
-                  @click="$emit('applySuggestionDecision', 'skip')"
+                  @click="$emit('applyDecision', { decision: 'skip' })"
                   >Skip</b-btn
                 >
                 <b-btn
@@ -77,7 +77,8 @@
                     v-for="(value, key) in refusalReasons"
                     :key="key"
                     @click="
-                      $emit('applySuggestionDecision', 'refuse', {
+                      $emit('applyDecision', {
+                        decision: 'refuse',
                         reason: key,
                       })
                     "

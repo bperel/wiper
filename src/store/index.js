@@ -1,13 +1,24 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import tiles from "./modules/tiles";
+import skippedRules from "./modules/skippedRules";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
     LANGUAGETOOL_ENDPOINT_ROOT: process.env.VUE_APP_LANGUAGETOOL_ENDPOINT_ROOT,
+    supportedLanguages: {
+      ca: "Català",
+      de: "Deutsch",
+      fr: "Français",
+      nl: "Nederlands",
+      pl: "Polski",
+      pt: "Português",
+      ru: "Русский",
+      uk: "Українська",
+    },
     accessTokens: null,
-    mostSkippedRules: [],
   },
   mutations: {
     initAccessTokens(state) {
@@ -16,18 +27,8 @@ export default new Vuex.Store({
     addAccessToken(state, { languageCode, username, accessToken }) {
       state.accessTokens.push({ languageCode, accessToken, username });
     },
-    setMostSkippedRules(state, mostSkippedRules) {
-      state.mostSkippedRules = mostSkippedRules;
-    },
   },
   getters: {
-    mostSkippedRulesLanguageCodes: (state) => [
-      ...new Set([
-        ...state.mostSkippedRules.map(
-          (skippedRule) => skippedRule.languageCode
-        ),
-      ]),
-    ],
     languageWithAccessToken: (state) =>
       state.accessTokens.map(
         (accessToken) =>
@@ -35,5 +36,8 @@ export default new Vuex.Store({
       ),
   },
   actions: {},
-  modules: {},
+  modules: {
+    tiles,
+    skippedRules,
+  },
 });
