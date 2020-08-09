@@ -12,7 +12,11 @@
       There are no suggestions for the moment.
     </b-alert>
     <template v-else>
-      <b-alert v-if="mostSkippedRulesNotIgnored.length" show variant="info"
+      <b-alert
+        v-if="mostSkippedRulesNotIgnored.length"
+        dismissible
+        show
+        variant="info"
         >It looks like you have skipped the same type of suggestions many
         times.<br />
         If you don't want Wiper to suggest you these kinds of suggestions, you
@@ -68,6 +72,7 @@ export default {
           );
         });
       vm.$store.dispatch("tiles/nextTile");
+      vm.$store.dispatch("skippedRules/loadList");
     },
 
     getSuggestions() {
