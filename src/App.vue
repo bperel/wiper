@@ -172,7 +172,6 @@ export default {
       } else {
         this.readAccessTokenCookies();
       }
-      return Promise.reject(new Error("No session"));
     },
   },
 };
