@@ -13,8 +13,9 @@
     </b-alert>
     <template v-else>
       <b-alert
-        v-if="mostSkippedRulesNotIgnored.length"
+        v-if="ignoreRuleAlert && mostSkippedRulesNotIgnored.length"
         dismissible
+        @dismissed="ignoreRuleAlert = false"
         show
         variant="info"
         >It looks like you have skipped the same type of suggestions many
@@ -22,7 +23,13 @@
         If you don't want Wiper to suggest you these kinds of suggestions, you
         can ignore them using the top-left menu.</b-alert
       >
-      <b-alert dismissible show variant="light">
+      <b-alert
+        v-if="introAlert"
+        dismissible
+        @dismissed="introAlert = false"
+        show
+        variant="light"
+      >
         Wiper found Wikipedia articles with potential spelling or grammar
         issues.<br />
         Click on <decision-button decision="fix" read-only /> to fix the issue
@@ -43,14 +50,15 @@
 
 <script>
 import TileList from "@/components/TileList.vue";
-import axios from "axios";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapGetters, mapState } from "vuex";
 import DecisionButton from "../components/DecisionButton";
 
 export default {
   name: "game",
   data: () => ({
     error: null,
+    introAlert: true,
+    ignoreRuleAlert: true,
   }),
 
   computed: {
@@ -72,6 +80,10 @@ export default {
   },
 
   methods: {
+    test() {
+      console.log("!");
+      this.ignoreRuleAlert = false;
+    },
     async applyDecision({ decision, reason = null }) {
       const vm = this;
       await this.$store
@@ -93,8 +105,6 @@ export default {
       });
     },
   },
-
-  ...mapActions("tiles", ["apply-decision", "nextTile"]),
 
   components: {
     DecisionButton,
