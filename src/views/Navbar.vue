@@ -71,11 +71,11 @@
       <b-dropdown-item
         v-for="(languageName, languageCode) in supportedLanguages"
         :key="languageCode"
+        @click.stop="loginOrLogout(languageCode)"
       >
         <b-badge>{{ languageCode }}</b-badge>
         <span class="language-name">{{ languageName }}</span>
         &nbsp;<b-button
-          @click.stop="loginOrLogout(languageCode)"
           class="login-logout"
           pill
           size="sm"
