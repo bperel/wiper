@@ -4,10 +4,35 @@
       <b-dropdown
         variant="outline-secondary"
         v-if="accessTokens && accessTokens.length"
+        @shown="startCounterAnimations"
       >
         <span slot="button-content">
           Menu
         </span>
+        <b-dropdown-group header="Stats">
+          <b-dropdown-group
+            :header="supportedLanguages[languageCode]"
+            :key="languageCode"
+            v-for="languageCode in userStatsLanguageCodes"
+          >
+            <ul>
+              <li
+                v-for="decision in ['fix', 'skip', 'dontfix']"
+                :key="decision"
+              >
+                <number
+                  :ref="`${decision}-counter`"
+                  :from="0"
+                  :duration="3"
+                  animation-paused
+                  :to="getDecisionCount(languageCode, decision)"
+                />
+                x
+                <DecisionButton :decision="decision" read-only />
+              </li>
+            </ul>
+          </b-dropdown-group>
+        </b-dropdown-group>
         <b-dropdown-item v-b-modal.modal-suggestion-history>
           View choice history
           <b-modal
@@ -37,7 +62,8 @@
           >
             <b-dropdown-text
               v-for="rule in mostSkippedRules.filter(
-                (skippedRule) => skippedRule.languageCode === languageCode
+                ({ languageCode: ruleLanguageCode }) =>
+                  ruleLanguageCode === languageCode
               )"
               :key="rule.ruleid"
               :title="rule.description"
@@ -93,13 +119,13 @@
 
 <script>
 import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
-import axios from "axios";
 import TileList from "../components/TileList";
 import { BIconCheck } from "bootstrap-vue";
+import DecisionButton from "../components/DecisionButton";
 
 export default {
   name: "Navbar",
-  components: { TileList, BIconCheck },
+  components: { TileList, BIconCheck, DecisionButton },
   computed: {
     ...mapState([
       "LANGUAGETOOL_ENDPOINT_ROOT",
@@ -107,10 +133,14 @@ export default {
       "accessTokens",
     ]),
     ...mapState("skippedRules", { mostSkippedRules: "list" }),
+    ...mapState("userStats", { userStats: "list" }),
     ...mapState("tiles", { pastSuggestions: "pastList" }),
     ...mapGetters(["languageWithAccessToken"]),
     ...mapGetters("skippedRules", {
       mostSkippedRulesLanguageCodes: "languageCodes",
+    }),
+    ...mapGetters("userStats", {
+      userStatsLanguageCodes: "languageCodes",
     }),
   },
   data: function () {
@@ -124,11 +154,27 @@ export default {
       async handler(newValue) {
         if (newValue && newValue.length) {
           await this.$store.dispatch("skippedRules/loadList");
+          await this.$store.dispatch("userStats/loadList");
         }
       },
     },
   },
   methods: {
+    startCounterAnimations() {
+      const vm = this;
+      ["fix", "dontfix", "skip"].forEach((decision) => {
+        vm.$refs[`${decision}-counter`][0].play();
+      });
+    },
+    getDecisionCount(languageCode, decision) {
+      return this.userStats.find(
+        ({ languageCode: statLanguageCode, applied }) =>
+          statLanguageCode === languageCode &&
+          ((decision === "fix" && applied === true) ||
+            (decision === "dontfix" && applied === false) ||
+            (decision === "skip" && applied === null))
+      ).count;
+    },
     loginOrLogout(languageCode) {
       if (this.isAlreadyLoggedIn(languageCode)) {
         this.$emit(

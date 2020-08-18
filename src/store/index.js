@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import tiles from "./modules/tiles";
 import skippedRules from "./modules/skippedRules";
+import userStats from "./modules/userStats";
 
 Vue.use(Vuex);
 
@@ -49,5 +50,6 @@ export default new Vuex.Store({
   modules: {
     tiles,
     skippedRules,
+    userStats,
   },
 });
