@@ -17,6 +17,7 @@ export default new Vuex.Store({
       pl: "Polski",
       pt: "Português",
       ru: "Русский",
+      sv: "Svenska",
       uk: "Українська",
     },
     refusalReasons: {
