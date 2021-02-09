@@ -1,14 +1,12 @@
 <template>
   <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
-    <div style="text-align: left;">
+    <div style="text-align: left">
       <b-dropdown
         variant="outline-secondary"
         v-if="accessTokens && accessTokens.length"
         @shown="startCounterAnimations"
       >
-        <span slot="button-content">
-          Menu
-        </span>
+        <span slot="button-content"> Menu </span>
         <b-dropdown-group header="Stats">
           <b-dropdown-group
             :header="supportedLanguages[languageCode]"

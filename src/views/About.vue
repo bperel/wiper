@@ -59,9 +59,7 @@
           <template v-slot:cell(sampleSuggestionId)="data">
             <SuggestionDiff :suggestion-id="data.item.sampleSuggestionId" />
           </template>
-          <template v-slot:head(sampleSuggestionId)>
-            Sample
-          </template>
+          <template v-slot:head(sampleSuggestionId)> Sample </template>
         </b-table>
       </b-card>
     </b-card-group>
