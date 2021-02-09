@@ -35,13 +35,14 @@ const actions = {
   },
 
   getSuggestions({ state, rootState, rootGetters, commit }) {
+    state.list = null;
     axios
       .get(
         `${rootState.LANGUAGETOOL_ENDPOINT_ROOT}/suggestions?` +
           rootGetters.languageWithAccessToken.join(",")
       )
       .then(({ data }) => {
-        state.list = (state.list || []).concat(data.suggestions);
+        state.list = data.suggestions;
         commit("setFirstAsActive");
       });
   },
