@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const state = {
-  list: [],
+  list: null,
   pastList: [],
   active: null,
 };

@@ -2,13 +2,16 @@
   <div class="game">
     <b-alert v-if="error" show variant="danger">{{ error }}</b-alert>
     <b-alert
-      v-else-if="!error && accessTokens && !accessTokens.length"
+      v-else-if="accessTokens && !accessTokens.length"
       show
       variant="warning"
       >You need to be logged in to play this game. Click on the "Accounts"
       button on the top right of this page!
     </b-alert>
-    <b-alert v-else-if="!error && tiles && !tiles.length" show variant="info">
+    <b-alert v-else-if="!tiles" show variant="info">
+      Loading suggestions...
+    </b-alert>
+    <b-alert v-else-if="!tiles.length" show variant="info">
       There are no suggestions for the moment.
     </b-alert>
     <template v-else>
@@ -42,7 +45,7 @@
       <TileList
         :tiles="tiles"
         :activeTile="activeTile"
-        @apply-decision="applyDecision"
+        @apply-decision="applyGameDecision"
       />
     </template>
   </div>
@@ -50,7 +53,7 @@
 
 <script>
 import TileList from "@/components/TileList.vue";
-import { mapGetters, mapState } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 import DecisionButton from "../components/DecisionButton";
 
 export default {
@@ -73,34 +76,30 @@ export default {
       immediate: true,
       handler(newValue) {
         if (newValue && newValue.length) {
-          this.getSuggestions();
+          this.getGameSuggestions();
         }
       },
     },
   },
 
   methods: {
-    test() {
-      console.log("!");
-      this.ignoreRuleAlert = false;
-    },
-    async applyDecision({ decision, reason = null }) {
+    ...mapActions("tiles", ["nextTile", "getSuggestions", "applyDecision"]),
+    ...mapActions("skippedRules", { loadSkippedRulesList: "loadList" }),
+    async applyGameDecision({ decision, reason = null }) {
       const vm = this;
-      await this.$store
-        .dispatch("tiles/applyDecision", { decision, reason })
-        .catch((response) => {
-          vm.$bvToast.toast(
-            (response || { message: null }).message ||
-              "An unexpected error occurred"
-          );
-        });
-      vm.$store.dispatch("tiles/nextTile");
-      vm.$store.dispatch("skippedRules/loadList");
+      await this.applyDecision({ decision, reason }).catch((response) => {
+        vm.$bvToast.toast(
+          (response || { message: null }).message ||
+            "An unexpected error occurred"
+        );
+      });
+      this.nextTile();
+      await this.loadSkippedRulesList();
     },
 
-    getSuggestions() {
+    getGameSuggestions() {
       const vm = this;
-      this.$store.dispatch("tiles/getSuggestions").catch(() => {
+      this.getSuggestions().catch(() => {
         vm.error = "Something wrong occurred while fetching the suggestions";
       });
     },
