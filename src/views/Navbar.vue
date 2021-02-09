@@ -83,9 +83,7 @@
         </b-dropdown-group>
       </b-dropdown>
     </div>
-    <a id="brand" class="navbar-brand" href="javascript:void(0)"
-      >WiPeR<sup>beta</sup></a
-    >
+    <a id="brand" class="navbar-brand" href="javascript:void(0)">WiPeR</a>
     <b-dropdown
       right
       id="accounts"
