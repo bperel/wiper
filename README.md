@@ -1,6 +1,6 @@
 # WiPeR
 
-https://tools.wmflabs.org/wiper
+https://wiper.toolforge.org
 
 WiPeR (stands for WikiPedia Remote editor) allows you to contribute to Wikipedia by simply accepting or refusing suggestions.
 
